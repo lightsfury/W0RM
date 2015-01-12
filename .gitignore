@@ -2,3 +2,4 @@
 /fpga/iseconfig
 /fpga/ipcore_dir/*
 !/fpga/ipcore_dir/*.xco
+!/fpga/ipcore_dir/*.xise
