@@ -1,0 +1,7 @@
+
+set(W0RM_ASSEMBLER_SOURCES
+  #"${CMAKE_SOURCE_DIR}/src/main"
+)
+
+add_executable(W0RM_asm "${W0RM_ASSEMBLER_SOURCES}")
+set_property(TARGET WORM_asm PROPERTY COMPILE_DEFINITIONS "_W0RM_DEBUG_=1")

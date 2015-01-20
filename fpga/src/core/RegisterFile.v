@@ -18,14 +18,18 @@ module W0RM_Core_RegisterFile #(
   port_write_data
 );
   // log base 2 function
-  function log2(integer n);
+  function log2(input integer n);
+	integer i, j;
     begin
-      integer i = 1, j = 0;
+		i = 1;
+		j = 0;
+      //integer i = 1, j = 0;
       while (i < n)
       begin
         j = j + 1;
         i = i << 1;
       end
+		log2 = j;
     end
   endfunction
   
@@ -35,7 +39,7 @@ module W0RM_Core_RegisterFile #(
   
   // Read port 0
   input wire  [REG_ADDR_BITS - 1:0] port_read0_addr;
-  output wire [DATA_WIDTH:0]        port_read0_data;
+  output wire [DATA_WIDTH - 1:0]    port_read0_data;
   
   // Read port 1
   input wire  [REG_ADDR_BITS - 1:0] port_read1_addr;
