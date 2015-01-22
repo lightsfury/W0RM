@@ -1,6 +1,6 @@
 `timescale 1ns/100ps
 
-module RegisterFile_base_tb #(
+module RegisterFile_2_port_base_tb #(
   parameter DATA_WIDTH    = 8,
   parameter NUM_REGISTERS = 4,
   parameter FILE_SOURCE   = "",
@@ -27,13 +27,13 @@ module RegisterFile_base_tb #(
   
   localparam ADDR_WIDTH     = log2(NUM_REGISTERS);
   localparam FS_DATA_WIDTH  = DATA_WIDTH + ADDR_WIDTH + 1;
-  localparam FC_DATA_WIDTH  = DATA_WIDTH + ADDR_WIDTH;
+  localparam FC_DATA_WIDTH  = 2 * (DATA_WIDTH + ADDR_WIDTH);
   
   reg                     clk = 0;
   reg                     go = 0;
   reg                     fc_go = 0;
   reg   [ADDR_WIDTH-1:0]  rd0_addr = 0,
-                          rd1_addr = 0;
+                          rd1_addr = 1;
   wire  [DATA_WIDTH-1:0]  rd0_data,
                           rd1_data;
   wire  [ADDR_WIDTH-1:0]  wr_addr;
@@ -41,7 +41,8 @@ module RegisterFile_base_tb #(
   wire                    wr_enable;
   wire                    fs_empty;
   wire                    fs_valid;
-  reg   [ADDR_WIDTH-1:0]  rd0_addr_r1 = 0;
+  reg   [ADDR_WIDTH-1:0]  rd0_addr_r1 = 0,
+                          rd1_addr_r1 = 0;
   
   initial #50 go <= 1;
   
@@ -54,6 +55,8 @@ module RegisterFile_base_tb #(
       // Move to confirm stage
       rd0_addr <= rd0_addr + 1;
       rd0_addr_r1 <= rd0_addr;
+      rd1_addr <= rd1_addr + 1;
+      rd1_addr_r1 <= rd1_addr;
       fc_go <= 1'b1;
     end
     
@@ -81,7 +84,7 @@ module RegisterFile_base_tb #(
   ) data_compare (
     .clk(clk),
     .valid(fc_go),
-    .data({rd0_addr_r1, rd0_data}),
+    .data({rd0_addr_r1, rd0_data, rd1_addr_r1, rd1_data}),
     .done(fc_done),
     .error(fc_error)
   );
