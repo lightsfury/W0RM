@@ -21,7 +21,12 @@ module FileCompare #(
   reg done_r = 0;
   reg error_r = 0;
   
-  reg [DATA_WIDTH-1:0]  data_i = 0;
+  reg [DATA_WIDTH-1:0]  data_i = 0,
+                        data_r = 0;
+  
+  reg empty_r = 0;
+  
+  always #1 empty_r <= $feof(fileHandle);
   
   assign error  = error_r;
   assign done   = done_r;
@@ -31,6 +36,7 @@ module FileCompare #(
     if (valid && ~done_r)
     begin
       status1 = $fscanf(fileHandle, "%x\n", data_i);
+      data_r <= data;
       
       if (data_i != data)
       begin

@@ -1,0 +1,16 @@
+0   and
+1   or
+2   xor
+3   not
+4   neg
+5   mul
+6   dev
+7   rem
+8   add
+9   sub
+a   X
+b   X
+c   lsr
+d   rsr
+e   asr
+f   X
