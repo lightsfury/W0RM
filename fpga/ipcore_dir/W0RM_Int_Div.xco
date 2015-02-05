@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version 14.7
-# Date: Wed Jan 21 21:43:28 2015
+# Date: Wed Feb 04 23:34:59 2015
 #
 ##############################################################
 #
@@ -40,7 +40,7 @@ SELECT Divider_Generator family Xilinx,_Inc. 3.0
 # END Select
 # BEGIN Parameters
 CSET algorithm_type=Radix2
-CSET ce=true
+CSET ce=false
 CSET clocks_per_division=1
 CSET component_name=W0RM_Int_Div
 CSET divide_by_zero_detect=false
@@ -58,4 +58,4 @@ CSET sclr_ce_priority=SCLR_overrides_CE
 MISC pkg_timestamp=2013-10-13T18:46:09Z
 # END Extra information
 GENERATE
-# CRC: a0fc6f44
+# CRC: 5d2a5f62

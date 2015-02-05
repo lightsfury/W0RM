@@ -15,7 +15,7 @@ module FileCompare #(
   
   initial begin
     fileHandle = $fopen(FILE_PATH, "r");
-    $display("FileCompare [%d], opening '%s': %d\n", DATA_WIDTH, FILE_PATH, fileHandle);
+    //$display("FileCompare [%d], opening '%s': %d\n", DATA_WIDTH, FILE_PATH, fileHandle);
   end
   
   reg done_r = 0;
