@@ -1,6 +1,6 @@
 `timescale 1ns/100ps
 
-module ALU_Mul_base_tb #(
+module ALU_Shifts_base_tb #(
   parameter DATA_WIDTH    = 8,
   parameter FILE_SOURCE   = "",
   parameter FILE_COMPARE  = ""
@@ -81,7 +81,7 @@ module ALU_Mul_base_tb #(
     .error(error)
   );
   
-  W0RM_ALU_Multiply #(
+  W0RM_ALU_Shifts #(
     .SINGLE_CYCLE(0),
     .DATA_WIDTH(DATA_WIDTH)
   ) dut (

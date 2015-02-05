@@ -33,7 +33,7 @@ module W0RM_Core_ALU #(
   //                          4'ha; // Unused
   //                          4'hb; // Unused
   localparam ALU_OPCODE_LSR = 4'hc;
-  localparam ALU_OPCODE_RSR = 4'hd;
+  localparam ALU_OPCODE_LSL = 4'hd;
   localparam ALU_OPCODE_ASR = 4'he;
   //                          4'hf; // Unused
   
@@ -169,7 +169,7 @@ module W0RM_Core_ALU #(
         ce_shifts   <= 1'b1;
       end
       
-      ALU_OPCODE_RSR:
+      ALU_OPCODE_LSL:
       begin
         ce_logic    <= 1'b0;
         ce_mul      <= 1'b0;
