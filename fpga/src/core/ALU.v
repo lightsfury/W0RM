@@ -10,11 +10,13 @@ module W0RM_Core_ALU #(
   // Control port
   input wire                    data_valid,
   input wire  [3:0]             store_flags_mask,
+  input wire                    ext_bit_size, // 1 for 16-bit, 0 for 8-bit
   // Data in port
   input wire  [DATA_WIDTH-1:0]  data_a,
                                 data_b,
   // Data out port
   output wire [DATA_WIDTH-1:0]  result,
+  output wire                   result_valid,
   output wire                   flag_zero,
                                 flag_negative,
                                 flag_overflow,
@@ -30,8 +32,8 @@ module W0RM_Core_ALU #(
   localparam ALU_OPCODE_REM = 4'h7;
   localparam ALU_OPCODE_ADD = 4'h8;
   localparam ALU_OPCODE_SUB = 4'h9;
-  //                          4'ha; // Unused
-  //                          4'hb; // Unused
+  localparam ALU_OPCODE_SEX = 4'ha;
+  localparam ALU_OPCODE_ZEX = 4'hb;
   localparam ALU_OPCODE_LSR = 4'hc;
   localparam ALU_OPCODE_LSL = 4'hd;
   localparam ALU_OPCODE_ASR = 4'he;
@@ -42,10 +44,51 @@ module W0RM_Core_ALU #(
   localparam ALU_FLAG_OVER  = 4'h2;
   localparam ALU_FLAG_CARRY = 4'h3;
   
-  reg [3:0]             opcode_r = 0;
-  reg [DATA_WIDTH-1:0]  data_a_r = 0,
-                        data_b_r = 0;
-  reg                   data_valid_r = 0;
+  reg   [3:0]             opcode_r = 0;
+  reg   [DATA_WIDTH-1:0]  data_a_r = 0,
+                          data_b_r = 0,
+                          result_r = 0;
+  reg                     data_valid_r = 0,
+                          result_valid_r = 0,
+                          pending_op = 0;
+  reg   [3:0]             result_flags_r = 0;
+  
+  wire  [DATA_WIDTH-1:0]  result_logic,
+                          result_mul,
+                          result_div_rem,
+                          result_add_sub,
+                          result_shifts,
+                          result_ext;
+  wire                    result_valid_logic,
+                          result_valid_mul,
+                          result_valid_div_rem,
+                          result_valid_add_sub,
+                          result_valid_shifts,
+                          result_valid_ext;
+  wire  [3:0]             result_flags_logic,
+                          result_flags_mul,
+                          result_flags_div_rem,
+                          result_flags_add_sub,
+                          result_flags_shifts,
+                          result_flags_ext;
+  
+  reg   [DATA_WIDTH-1:0]  result_i = 0;
+  reg                     result_valid_i = 0;
+  reg   [3:0]             result_flags_i = 0;
+  
+  reg   ce_logic    = 0,
+        ce_mul      = 0,
+        ce_div_rem  = 0,
+        ce_add_sub  = 0,
+        ce_shifts   = 0,
+        ce_ext      = 0;
+  
+  assign result         = result_r;
+  assign result_valid   = result_valid_r;
+  assign flag_zero      = result_flags_r[ALU_FLAG_ZERO];
+  assign flag_negative  = result_flags_r[ALU_FLAG_NEG];
+  assign flag_overflow  = result_flags_r[ALU_FLAG_OVER];
+  assign flag_carry     = result_flags_r[ALU_FLAG_CARRY];
   
   always @(posedge clk)
   begin
@@ -59,15 +102,37 @@ module W0RM_Core_ALU #(
       pending_op  <= 1'b1;
     end
     
-    if (ret_data_valid && pending_op)
+    if (result_valid_i && pending_op)
     begin
       pending_op <= 1'b0;
       
-      // demux to output data register & valid
+      result_r  <= result_i;
+      
+      if (store_flags_mask[0])
+      begin
+        result_flags_r[0] <= result_flags_i[0];
+      end
+      
+      if (store_flags_mask[1])
+      begin
+        result_flags_r[1] <= result_flags_i[1];
+      end
+      
+      if (store_flags_mask[2])
+      begin
+        result_flags_r[2] <= result_flags_i[2];
+      end
+      
+      if (store_flags_mask[3])
+      begin
+        result_flags_r[3] <= result_flags_i[3];
+      end
     end
+    
+    result_valid_r <= result_valid_i;
   end
   
-  always @(opcode_r)
+  always @(*)
   begin
     case (opcode_r)
       ALU_OPCODE_AND:
@@ -77,6 +142,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_logic;
+        result_valid_i  <= result_valid_logic;
+        result_flags_i  <= result_flags_logic;
       end
       
       ALU_OPCODE_OR:
@@ -86,6 +156,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_logic;
+        result_valid_i  <= result_valid_logic;
+        result_flags_i  <= result_flags_logic;
       end
       
       ALU_OPCODE_XOR:
@@ -95,6 +170,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_logic;
+        result_valid_i  <= result_valid_logic;
+        result_flags_i  <= result_flags_logic;
       end
       
       ALU_OPCODE_NOT:
@@ -104,6 +184,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_logic;
+        result_valid_i  <= result_valid_logic;
+        result_flags_i  <= result_flags_logic;
       end
       
       ALU_OPCODE_NEG:
@@ -113,6 +198,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_logic;
+        result_valid_i  <= result_valid_logic;
+        result_flags_i  <= result_flags_logic;
       end
       
       ALU_OPCODE_MUL:
@@ -122,6 +212,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_mul;
+        result_valid_i  <= result_valid_mul;
+        result_flags_i  <= result_flags_mul;
       end
       
       ALU_OPCODE_DIV:
@@ -131,6 +226,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b1;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_div_rem;
+        result_valid_i  <= result_valid_div_rem;
+        result_flags_i  <= result_flags_div_rem;
       end
       
       ALU_OPCODE_REM:
@@ -140,6 +240,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b1;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_div_rem;
+        result_valid_i  <= result_valid_div_rem;
+        result_flags_i  <= result_flags_div_rem;
       end
       
       ALU_OPCODE_ADD:
@@ -149,6 +254,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b1;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_add_sub;
+        result_valid_i  <= result_valid_add_sub;
+        result_flags_i  <= result_flags_add_sub;
       end
       
       ALU_OPCODE_SUB:
@@ -158,6 +268,39 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b1;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_add_sub;
+        result_valid_i  <= result_valid_add_sub;
+        result_flags_i  <= result_flags_add_sub;
+      end
+      
+      ALU_OPCODE_SEX:
+      begin
+        ce_logic    <= 1'b0;
+        ce_mul      <= 1'b0;
+        ce_div_rem  <= 1'b0;
+        ce_add_sub  <= 1'b0;
+        ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b1;
+        
+        result_i        <= result_ext;
+        result_valid_i  <= result_valid_ext;
+        result_flags_i  <= result_flags_ext;
+      end
+      
+      ALU_OPCODE_ZEX:
+      begin
+        ce_logic    <= 1'b0;
+        ce_mul      <= 1'b0;
+        ce_div_rem  <= 1'b0;
+        ce_add_sub  <= 1'b0;
+        ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b1;
+        
+        result_i        <= result_ext;
+        result_valid_i  <= result_valid_ext;
+        result_flags_i  <= result_flags_ext;
       end
       
       ALU_OPCODE_LSR:
@@ -167,6 +310,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b1;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_shifts;
+        result_valid_i  <= result_valid_shifts;
+        result_flags_i  <= result_flags_shifts;
       end
       
       ALU_OPCODE_LSL:
@@ -176,6 +324,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b1;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_shifts;
+        result_valid_i  <= result_valid_shifts;
+        result_flags_i  <= result_flags_shifts;
       end
       
       ALU_OPCODE_ASR:
@@ -185,6 +338,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b1;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= result_shifts;
+        result_valid_i  <= result_valid_shifts;
+        result_flags_i  <= result_flags_shifts;
       end
       
       default:
@@ -194,6 +352,11 @@ module W0RM_Core_ALU #(
         ce_div_rem  <= 1'b0;
         ce_add_sub  <= 1'b0;
         ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= 0;
+        result_valid_i  <= 0;
+        result_flags_i  <= 0;
       end
     endcase
   end
@@ -205,7 +368,7 @@ module W0RM_Core_ALU #(
   ) logic (
     .clk(clk),
     
-    .data_valid(ce_logic),
+    .data_valid(ce_logic & data_valid_r),
     .opcode(opcode_r),
     
     .data_a(data_a_r),
@@ -223,7 +386,7 @@ module W0RM_Core_ALU #(
   ) mul (
     .clk(clk),
     
-    .data_valid(ce_mul),
+    .data_valid(ce_mul & data_valid_r),
     .opcode(opcode_r),
     
     .data_a(data_a_r),
@@ -241,7 +404,7 @@ module W0RM_Core_ALU #(
   ) div_rem (
     .clk(clk),
     
-    .data_valid(ce_div_rem),
+    .data_valid(ce_div_rem & data_valid_r),
     .opcode(opcode_r),
     
     .data_a(data_a_r),
@@ -259,7 +422,7 @@ module W0RM_Core_ALU #(
   ) add_sub (
     .clk(clk),
     
-    .data_valid(ce_add_sub),
+    .data_valid(ce_add_sub & data_valid_r),
     .opcode(opcode_r),
     
     .data_a(data_a_r),
@@ -277,7 +440,7 @@ module W0RM_Core_ALU #(
   ) shifts (
     .clk(clk),
     
-    .data_valid(ce_shifts),
+    .data_valid(ce_shifts & data_valid_r),
     .opcode(opcode_r),
     
     .data_a(data_a_r),
@@ -286,5 +449,24 @@ module W0RM_Core_ALU #(
     .result(result_shifts),
     .result_valid(result_valid_shifts),
     .result_flags(result_flags_shifts)
+  );
+  
+  // Sign/Zero extend
+  W0RM_ALU_Extend #(
+    .SINGLE_CYCLE(SINGLE_CYCLE),
+    .DATA_WIDTH(DATA_WIDTH)
+  ) extend (
+    .clk(clk),
+    
+    .data_valid(ce_ext & data_valid_r),
+    .opcode(opcode_r),
+    .ext_8_16(ext_bit_size),
+    
+    .data_a(data_a_r),
+    .data_b(data_b_r),
+    
+    .result(result_ext),
+    .result_valid(result_valid_ext),
+    .result_flags(result_flags_ext)
   );
 endmodule

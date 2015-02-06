@@ -8,8 +8,8 @@
 7   rem
 8   add
 9   sub
-a   X
-b   X
+a   sext
+b   zext
 c   lsr
 d   rsr
 e   asr
