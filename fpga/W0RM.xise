@@ -107,45 +107,45 @@
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="51"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="51"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_Logic_base_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_Logic_base_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="53"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="53"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="53"/>
     </file>
-    <file xil_pn:name="src/core/ALU_AddSub.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="src/core/ALU/ALU_AddSub.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="10"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
-    <file xil_pn:name="src/core/ALU_DivRem.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="src/core/ALU/ALU_DivRem.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="9"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
-    <file xil_pn:name="src/core/ALU_Logic.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="src/core/ALU/ALU_Logic.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="7"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
-    <file xil_pn:name="src/core/ALU_Multiply.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="src/core/ALU/ALU_Multiply.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="6"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
-    <file xil_pn:name="src/core/ALU_Shifts.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="src/core/ALU/ALU_Shifts.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="5"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="1"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_Logic_1_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_Logic_1_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="59"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="59"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="59"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_AddSub_1_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_AddSub_1_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="62"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="62"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="62"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_AddSub_base_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_AddSub_base_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="63"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="63"/>
@@ -161,37 +161,37 @@
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="1"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_Mul_1_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_Mul_1_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="74"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="74"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="74"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_Mul_base_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_Mul_base_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="75"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="75"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="75"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_DivRem_1_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_DivRem_1_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="78"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="78"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="78"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_DivRem_base_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_DivRem_base_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="79"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="79"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="79"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_Shifts_1_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_Shifts_1_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="82"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="82"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="82"/>
     </file>
-    <file xil_pn:name="testbench/core/ALU_Shifts_base_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/core/ALU/ALU_Shifts_base_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="83"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="83"/>
@@ -203,7 +203,7 @@
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="88"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="88"/>
     </file>
-    <file xil_pn:name="src/core/ALU_Extend.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="src/core/ALU/ALU_Extend.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="8"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="89"/>
     </file>
