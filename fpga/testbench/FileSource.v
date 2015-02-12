@@ -1,4 +1,4 @@
-`timescale 1ns/1ns
+`timescale 1ns/100ps
 
 module FileSource #(
   parameter DATA_WIDTH  = 32,
@@ -14,9 +14,9 @@ module FileSource #(
   reg                   valid_r = 0;
   reg                   empty_r = 0;
   
-  assign data   = data_r;
-  assign valid  = valid_r;
-  assign empty  = empty_r;
+  assign #0.1 data   = data_r;
+  assign #0.1 valid  = valid_r;
+  assign #0.1 empty  = empty_r;
   
   integer fileHandle;
   integer status1;

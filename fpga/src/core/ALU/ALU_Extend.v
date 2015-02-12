@@ -27,13 +27,13 @@ module W0RM_ALU_Extend #(
   localparam ALU_FLAG_OVER  = 4'h2;
   localparam ALU_FLAG_CARRY = 4'h3;
   
+  reg   [DATA_WIDTH-1:0]  result_r = 0;
+  reg                     result_valid_r = 0;
+  
   assign result_flags[ALU_FLAG_ZERO]  = result_r == 0;
   assign result_flags[ALU_FLAG_NEG]   = result_r[MSB];
   assign result_flags[ALU_FLAG_OVER]  = 1'b0; // Overflow and carry are not
   assign result_flags[ALU_FLAG_CARRY] = 1'b0; // defined for extend operations
-  
-  reg   [DATA_WIDTH-1:0]  result_r = 0;
-  reg                     result_valid_r = 0;
   
   assign result = result_r;
   assign result_valid = result_valid_r;

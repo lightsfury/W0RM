@@ -47,8 +47,9 @@ module W0RM_Static_Timer #(
     end
     else if (start)
     begin
-      timer <= LOAD;
-      go    <= 1;
+      timer   <= LOAD;
+      go      <= 1;
+      stop_r  <= 0;
     end
     else
     begin

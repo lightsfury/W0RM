@@ -37,7 +37,7 @@ module W0RM_Core_ALU #(
   localparam ALU_OPCODE_LSR = 4'hc;
   localparam ALU_OPCODE_LSL = 4'hd;
   localparam ALU_OPCODE_ASR = 4'he;
-  //                          4'hf; // Unused
+  localparam ALU_OPCODE_MOV = 4'hf;
   
   localparam ALU_FLAG_ZERO  = 4'h0;
   localparam ALU_FLAG_NEG   = 4'h1;
@@ -343,6 +343,20 @@ module W0RM_Core_ALU #(
         result_i        <= result_shifts;
         result_valid_i  <= result_valid_shifts;
         result_flags_i  <= result_flags_shifts;
+      end
+      
+      ALU_OPCODE_MOV:
+      begin
+        ce_logic    <= 1'b0;
+        ce_mul      <= 1'b0;
+        ce_div_rem  <= 1'b0;
+        ce_add_sub  <= 1'b0;
+        ce_shifts   <= 1'b0;
+        ce_ext      <= 1'b0;
+        
+        result_i        <= data_b_r;
+        result_valid_i  <= data_valid_r;
+        result_flags_i  <= 0;
       end
       
       default:

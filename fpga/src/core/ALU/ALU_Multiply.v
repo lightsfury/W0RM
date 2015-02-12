@@ -31,6 +31,7 @@ module W0RM_ALU_Multiply #(
   reg                         flag_carry_r = 0,
                               result_valid_r = 0;
   wire  [(2*DATA_WIDTH)-1:0]  result_i;
+  wire                        result_valid_i;
   
   assign result_flags[ALU_FLAG_ZERO]  = result_r == 0;
   assign result_flags[ALU_FLAG_NEG]   = result_r[MSB];

@@ -1,0 +1,26 @@
+FEDCBA9876543210    Inst
+0000000000000000    NOP
+00010000Rd.40000    SEXTB Rd
+00010100Rd.40000    SEXTH Rd
+00011000Rd.40000    ZEXTB Rd
+00011100Rd.40000    SEXTH Rd
+00100C.3L......8    B<cond> label
+00110C.3XXXXRd.4    BX<cond> Rd
+00101C.3L......8    BL<cond> label
+00111C.3XXXXRd.4    BLX<cond> Rd
+0100Rd.4XXXXRn.4    MOV Rd,Rn
+0101Rd.4L......8    MOV Rd,#8-bit literal
+0110Rd.4Rn.4L..4    LOAD Rd,[Rn,#4-bit literal]
+0111Rd.4Rn.4L..4    STORE Rd,[Rn,#4-bit literal]
+
+1000Op.4Rd.4L..4    ALU Rd,#4-bit literal
+1001Op.4Rd.4Rn.4    ALU Rd,Rn
+1010Rd.4O20L...5    SHIFT Rd,#literal
+1011Rd.40200Rd.4    SHIFT Rd,Rn
+110XXXXXXXXXXXXX    Reserved, do not use
+111000000000Rd.4    PUSH Rd
+111010000000Rd.4    POP Rd
+111100L.......10    B label
+111101L.......10    BL label
+111110XXXXXXRd.4    BX Rd
+111111XXXXXXRd.4    BLX Rd
