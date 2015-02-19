@@ -147,10 +147,10 @@ module W0RM_Core_Decode #(
   localparam INST_Bucnd_RD_LOW    = 0;
   localparam INST_Bucnd_LIT_HIGH  = 9;
   localparam INST_Bucnd_LIT_LOW   = 0;
-  localparam INST_Bucnd_SRC       = 12;
+  localparam INST_Bucnd_SRC       = 11;
   localparam INST_Bucnd_SRC_LIT   = 0;
   localparam INST_Bucnd_SRC_REG   = 1;
-  localparam INST_Bucnd_LINK      = 11;
+  localparam INST_Bucnd_LINK      = 10;
   localparam INST_Bucnd_LINK_YES  = 1;
   localparam INST_Bucnd_LINK_NO   = 0;
   
@@ -535,11 +535,12 @@ module W0RM_Core_Decode #(
         
         INST_IDENT_Bucnd:
         begin
-          rd_addr_r           = instruction_r[INST_Bucnd_RD_HIGH:INST_Bucnd_RD_LOW];
-          rn_addr_r           = 0;
+          rd_addr_r           = 0;
+          rn_addr_r           = instruction_r[INST_Bucnd_RD_HIGH:INST_Bucnd_RD_LOW];
           literal_r           = instruction_r[INST_Bucnd_LIT_HIGH:INST_Bucnd_LIT_LOW];
           
-          alu_op2_select_r    = 0;
+          alu_op2_select_r    = (instruction_r[INST_Bucnd_SRC] == INST_Bucnd_SRC_REG)
+                              ? ALU_OP2_SOURCE_REG : ALU_OP2_SOURCE_LIT;
           alu_ext_8_16_r      = 0;
           alu_opcode_r        = 0;
           alu_store_flags_r   = 0;
@@ -550,7 +551,7 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
-          memory_data_src_r  = 0;
+          memory_data_src_r   = 0;
           memory_addr_src_r   = 0;
           memory_is_pop_r     = 0;
           
