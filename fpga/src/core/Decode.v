@@ -31,8 +31,10 @@ module W0RM_Core_Decode #(
   // Memory stage
   output wire                   decode_memory_write,
                                 decode_memory_read,
+  output wire [1:0]             decode_memory_data_src,
+                                decode_memory_addr_src,
   // RegStore stage
-                                decode_reg_write,
+  output wire                   decode_reg_write,
   output wire [1:0]             decode_reg_write_source,
   output wire [ADDR_WIDTH-1:0]  decode_reg_write_addr
   //! @todo Create control buses for RegFetch, ALU, Memory, RegWrite stages
@@ -138,8 +140,8 @@ module W0RM_Core_Decode #(
   localparam INST_PUPO_RD_HIGH    = 3;
   localparam INST_PUPO_RD_LOW     = 0;
   localparam INST_PUPO_TYPE       = 11;
-  localparam INST_PUPO_TYPE_POP   = 0;
-  localparam INST_PUPO_TYPE_PUSH  = 1;
+  localparam INST_PUPO_TYPE_PUSH  = 0;
+  localparam INST_PUPO_TYPE_POP   = 1;
   
   localparam INST_Bucnd_RD_HIGH   = 3;
   localparam INST_Bucnd_RD_LOW    = 0;
@@ -156,9 +158,20 @@ module W0RM_Core_Decode #(
   localparam REG_WRITE_SOURCE_MEM = 1;
   localparam REG_WRITE_SOURCE_B   = 2;
   
+  localparam MEM_WRITE_SOURCE_RN  = 0;
+  localparam MEM_WRITE_SOURCE_RD  = 1;
+  localparam MEM_WRITE_SOURCE_ALU = 2;
+  localparam MEM_WRITE_SOURCE_LIT = 3;
+  
+  localparam MEM_ADDR_SOURCE_ALU  = 0;
+  localparam MEM_ADDR_SOURCE_RN   = 1;
+  localparam MEM_ADDR_SOURCE_RD   = 2;
+  localparam MEM_ADDR_SOURCE_LIT  = 3;
+  
   localparam ALU_OP2_SOURCE_REG = 0;
   localparam ALU_OP2_SOURCE_LIT = 1;
   
+  localparam REG_ADDR_STACK_REG = 13;
   localparam REG_ADDR_LINK_REG  = 14;
   
   function [DATA_WIDTH-1:0] sign_extend_8(input reg[7:0] d);
@@ -181,8 +194,11 @@ module W0RM_Core_Decode #(
                           is_cond_branch_r = 0;
   reg   [2:0]             branch_code_r = 0;
   reg                     memory_write_r = 0,
-                          memory_read_r = 0,
-                          reg_write_r = 0;
+                          memory_read_r = 0;
+  reg   [1:0]             memory_data_src_r = 0,
+                          memory_addr_src_r = 0;
+  reg                     memory_is_pop_r = 0;
+  reg                     reg_write_r = 0;
   reg   [1:0]             reg_write_source_r = 0;
   reg   [ADDR_WIDTH-1:0]  reg_write_addr_r = 0;
   reg                     control_valid_r = 0;
@@ -293,6 +309,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = 0;
           reg_write_source_r  = 0;
@@ -317,6 +336,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = 1;
           reg_write_source_r  = REG_WRITE_SOURCE_ALU;
@@ -341,6 +363,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = (instruction_r[INST_Bcond_LINK] == INST_Bcond_LINK_YES);
           reg_write_source_r  = REG_WRITE_SOURCE_B;
@@ -365,6 +390,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = 1;
           reg_write_source_r  = REG_WRITE_SOURCE_ALU;
@@ -388,6 +416,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = (instruction_r[INST_LDSTR_TYPE] == INST_LDSTR_TYPE_STR);
           memory_read_r       = (instruction_r[INST_LDSTR_TYPE] == INST_LDSTR_TYPE_LOAD);
+          memory_data_src_r  = MEM_WRITE_SOURCE_RN;
+          memory_addr_src_r   = MEM_ADDR_SOURCE_ALU;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = (instruction_r[INST_LDSTR_TYPE] == INST_LDSTR_TYPE_LOAD);
           reg_write_source_r  = REG_WRITE_SOURCE_MEM;
@@ -412,6 +443,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = 1;
           reg_write_source_r  = REG_WRITE_SOURCE_ALU;
@@ -436,6 +470,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = 1;
           reg_write_source_r  = REG_WRITE_SOURCE_ALU;
@@ -459,6 +496,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = 0;
           reg_write_source_r  = 0;
@@ -467,13 +507,13 @@ module W0RM_Core_Decode #(
         
         INST_IDENT_PUPO:
         begin
-          rd_addr_r           = 0;
+          rd_addr_r           = REG_ADDR_STACK_REG;
           rn_addr_r           = instruction_r[INST_PUPO_RD_HIGH:INST_PUPO_RD_LOW];
-          literal_r           = 0;
+          literal_r           = 4;
           
-          alu_op2_select_r    = ALU_OP2_SOURCE_REG;
+          alu_op2_select_r    = ALU_OP2_SOURCE_LIT;
           alu_ext_8_16_r      = 0;
-          alu_opcode_r        = ALU_OPCODE_MOV;
+          alu_opcode_r        = (instruction_r[INST_PUPO_TYPE] == INST_PUPO_TYPE_PUSH) ? ALU_OPCODE_SUB : ALU_OPCODE_ADD;
           alu_store_flags_r   = 0;
           
           is_branch_r         = 0;
@@ -482,10 +522,15 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = (instruction_r[INST_PUPO_TYPE] == INST_PUPO_TYPE_PUSH);
           memory_read_r       = (instruction_r[INST_PUPO_TYPE] == INST_PUPO_TYPE_POP);
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = (instruction_r[INST_PUPO_TYPE] == INST_PUPO_TYPE_PUSH) ? MEM_ADDR_SOURCE_ALU : MEM_ADDR_SOURCE_RN;
+          memory_is_pop_r     = (instruction_r[INST_PUPO_TYPE] == INST_PUPO_TYPE_POP);
           
           reg_write_r         = (instruction_r[INST_PUPO_TYPE] == INST_PUPO_TYPE_POP);
           reg_write_source_r  = REG_WRITE_SOURCE_MEM;
           reg_write_addr_r    = instruction_r[INST_PUPO_RD_HIGH:INST_PUPO_RD_LOW];
+          
+          //! @todo Do I need a 2nd register write port?
         end
         
         INST_IDENT_Bucnd:
@@ -505,6 +550,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = (instruction_r[INST_Bucnd_LINK] == INST_Bucnd_LINK_YES);
           reg_write_source_r  = REG_WRITE_SOURCE_B;
@@ -528,6 +576,9 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
           
           reg_write_r         = 0;
           reg_write_source_r  = 0;
@@ -538,7 +589,6 @@ module W0RM_Core_Decode #(
   end
   
   assign #0.1 control_valid           = inst_valid_r;
-  //assign  control_valid           = control_valid_r;
   
   assign #0.1 decode_rd_addr          = rd_addr_r;
   assign #0.1 decode_rn_addr          = rn_addr_r;
@@ -555,6 +605,8 @@ module W0RM_Core_Decode #(
   
   assign #0.1 decode_memory_write     = memory_write_r;
   assign #0.1 decode_memory_read      = memory_read_r;
+  assign #0.1 decode_memory_data_src  = memory_data_src_r;
+  assign #0.1 decode_memory_addr_src  = memory_addr_src_r;
   
   assign #0.1 decode_reg_write        = reg_write_r;
   assign #0.1 decode_reg_write_source = reg_write_source_r;
