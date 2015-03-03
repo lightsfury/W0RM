@@ -24,16 +24,44 @@ module W0RM_CoreMemory #(
   output wire                     bus_valid_out
 );
   localparam MEM_SIZE = 1024;
+  
+  reg   bus_valid_out_r   = 0,
+        inst_valid_out_r  = 0;
+  
   wire  [DATA_WIDTH-1:0]    bus_data_i;
   wire  [INST_WIDTH-1:0]    inst_data_i;
+  wire  [10:0]              inst_addr_i     = inst_addr[11:1];
+  wire  [9:0]               bus_addr_i      = bus_addr[11:2];
+  wire                      bus_decode_ce   = (bus_addr >= BASE_ADDR)
+                                           && (bus_addr < (BASE_ADDR + MEM_SIZE)),
+                            inst_decode_ce  = (inst_addr >= BASE_ADDR)
+                                           && (inst_addr < (BASE_ADDR + MEM_SIZE));
   
-  //reg   inst_decode_ce  = 0,
-  //      bus_decode_ce   = 0;
-
-  wire [10:0] inst_addr_i = inst_addr[11:1];
-  wire [9:0]  bus_addr_i  = bus_addr[11:2];
-  wire bus_decode_ce  = (bus_addr >= BASE_ADDR) && (bus_addr < (BASE_ADDR + MEM_SIZE));
-  wire inst_decode_ce = (inst_addr >= BASE_ADDR) && (inst_addr < (BASE_ADDR + MEM_SIZE));
+  assign bus_data_out   = bus_data_i;
+  assign bus_valid_out  = bus_valid_out_r;
+  assign inst_data_out  = inst_data_i;
+  assign inst_valid_out = inst_valid_out_r;
+  
+  always @(posedge clk)
+  begin
+    if (bus_valid_in)
+    begin
+      bus_valid_out_r <= bus_read & bus_decode_ce;
+    end
+    else
+    begin
+      bus_valid_out_r <= 1'b0;
+    end
+    
+    if (inst_valid_in)
+    begin
+      inst_valid_out_r <= inst_read & inst_decode_ce;
+    end
+    else
+    begin
+      inst_valid_out_r <= 1'b0;
+    end
+  end
   
   generate
     if (BLOCK_RAM == 1)
@@ -48,7 +76,7 @@ module W0RM_CoreMemory #(
         
         .clkb(clk),
         .enb((bus_read | bus_write) & bus_valid_in & bus_decode_ce),
-        .web(bus_write_i),
+        .web(bus_write & bus_valid_in & bus_decode_ce),
         .addrb(bus_addr_i),
         .dinb(bus_data_in),
         .doutb(bus_data_i)

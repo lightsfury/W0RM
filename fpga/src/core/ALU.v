@@ -8,6 +8,7 @@ module W0RM_Core_ALU #(
   // Operation port
   input wire  [3:0]             opcode,
   // Control port
+  output wire                   ready,
   input wire                    data_valid,
   input wire  [3:0]             store_flags_mask,
   input wire                    ext_bit_size, // 1 for 16-bit, 0 for 8-bit
@@ -89,6 +90,7 @@ module W0RM_Core_ALU #(
   assign flag_negative  = result_flags_r[ALU_FLAG_NEG];
   assign flag_overflow  = result_flags_r[ALU_FLAG_OVER];
   assign flag_carry     = result_flags_r[ALU_FLAG_CARRY];
+  assign ready          = ~pending_op;
   
   always @(posedge clk)
   begin
