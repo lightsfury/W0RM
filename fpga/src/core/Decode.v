@@ -31,6 +31,7 @@ module W0RM_Core_Decode #(
   // Memory stage
   output wire                   decode_memory_write,
                                 decode_memory_read,
+                                decode_memory_is_pop,
   output wire [1:0]             decode_memory_data_src,
                                 decode_memory_addr_src,
   // RegStore stage
@@ -244,47 +245,6 @@ module W0RM_Core_Decode #(
     begin
       inst_valid_r  <= 1'b0;
     end
-    
-    /*
-    if (!fetch_ready)
-    begin
-      // Fetch isn't ready
-      if (inst_valid)
-      begin
-        // And we have a waiting instruction
-        if (!inst_valid_r)
-        begin
-          // But we don't have a pending instruction
-          instruction_r <= instruction;
-          inst_valid_r  <= 1'b1;
-        end
-        else
-        begin
-          // We do have a pending instruction, so don't do anything
-          inst_valid_r  <= 1'b0;
-        end
-      end
-    end
-    else
-    begin
-      // Fetch is ready
-      if (inst_valid_r)
-      begin
-        // We have a pending instruction decode
-        inst_valid_r <= 1'b0;
-      end
-      else if (inst_valid)
-      begin
-        // We don't have a pending instruction,
-        // But we can accept one
-        instruction_r <= instruction;
-        inst_valid_r    <= 1'b1;
-      end
-      else
-      begin
-        inst_valid_r    <= 1'b0;
-      end
-    end // */
   end
   
   always @(*)
@@ -606,6 +566,7 @@ module W0RM_Core_Decode #(
   
   assign #0.1 decode_memory_write     = memory_write_r;
   assign #0.1 decode_memory_read      = memory_read_r;
+  assign #0.1 decode_memory_is_pop    = memory_is_pop_r;
   assign #0.1 decode_memory_data_src  = memory_data_src_r;
   assign #0.1 decode_memory_addr_src  = memory_addr_src_r;
   

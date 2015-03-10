@@ -2,7 +2,8 @@
 
 module W0RM_Core_ALU #(
   parameter SINGLE_CYCLE  = 0,
-  parameter DATA_WIDTH    = 8
+  parameter DATA_WIDTH    = 8,
+  parameter USER_WIDTH    = 1
 )(
   input wire                    clk,
   // Operation port
@@ -21,7 +22,9 @@ module W0RM_Core_ALU #(
   output wire                   flag_zero,
                                 flag_negative,
                                 flag_overflow,
-                                flag_carry
+                                flag_carry,
+  input wire  [USER_WIDTH-1:0]  user_data_in,
+  output wire [USER_WIDTH-1:0]  user_data_out
 );
   localparam ALU_OPCODE_AND = 4'h0;
   localparam ALU_OPCODE_OR  = 4'h1;
@@ -84,6 +87,8 @@ module W0RM_Core_ALU #(
         ce_shifts   = 0,
         ce_ext      = 0;
   
+  reg   [USER_WIDTH-1:0]  user_data_r = 0;
+  
   assign result         = result_r;
   assign result_valid   = result_valid_r;
   assign flag_zero      = result_flags_r[ALU_FLAG_ZERO];
@@ -91,6 +96,7 @@ module W0RM_Core_ALU #(
   assign flag_overflow  = result_flags_r[ALU_FLAG_OVER];
   assign flag_carry     = result_flags_r[ALU_FLAG_CARRY];
   assign ready          = ~pending_op;
+  assign user_data_out  = user_data_r;
   
   always @(posedge clk)
   begin
@@ -102,6 +108,7 @@ module W0RM_Core_ALU #(
       data_a_r    <= data_a;
       data_b_r    <= data_b;
       pending_op  <= 1'b1;
+      user_data_r <= user_data_in;
     end
     
     if (result_valid_i && pending_op)
