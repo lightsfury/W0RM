@@ -1,6 +1,11 @@
 `timescale 1ns/100ps
 
-module W0RM_TopLevel_tb;
+module W0RM_TopLevel_base_tb #(
+  parameter FILE_SOURCE = ""
+)(
+  output wire done,
+              error
+);
   reg clk = 0, reset = 1;
   reg inst_valid_r = 0;
   
@@ -11,8 +16,8 @@ module W0RM_TopLevel_tb;
   wire  [15:0]  inst_data;
   
   FileSource #(
-    .DATA_WIDTH(1 + 32),
-    .FILE_PATH("../testbench/data/core/IFetch/IFetch_1_tb_data.txt")
+    .DATA_WIDTH(16),
+    .FILE_PATH(FILE_SOURCE) //"../testbench/data/core/IFetch/IFetch_1_tb_data.txt")
   ) inst_source (
     .clk(clk),
     
