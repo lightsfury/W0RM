@@ -2,13 +2,15 @@
 
 module W0RM_TopLevel_base_tb #(
   parameter FILE_SOURCE   = "",
-  parameter FILE_COMPARE  = ""
+  parameter FILE_COMPARE  = "",
+  parameter FILE_MEM_DEPTH = 256
 )(
   output wire done,
               error
 );
   localparam DATA_WIDTH = 32;
   localparam ADDR_WIDTH = 32;
+  localparam INST_WIDTH = 16;
   
   reg clk = 0, reset = 1;
   reg inst_valid_r = 0;
@@ -21,12 +23,29 @@ module W0RM_TopLevel_base_tb #(
                           mem_valid_o;
   reg                     mem_valid_i = 0;
   
+  
   initial #11 reset = 0;
   
   always #2.5 clk <= ~clk;
   
-  wire  [15:0]  inst_data;
+  wire  [INST_WIDTH-1:0]  inst_data;
+  wire  [ADDR_WIDTH-1:0]  inst_addr;    
   
+  FileMemory #(
+    .FILE_PATH(FILE_SOURCE),
+    .DATA_WIDTH(INST_WIDTH),
+    .ADDR_WIDTH(ADDR_WIDTH),
+    .MEM_DEPTH(FILE_MEM_DEPTH)
+  ) inst_mem (
+    .clk(clk),
+    
+    .valid_i(inst_req_valid),
+    .addr_i(inst_addr),
+    
+    .valid_o(inst_valid),
+    .data_o(inst_data)
+  );
+  /*
   FileSource #(
     .DATA_WIDTH(16),
     .FILE_PATH(FILE_SOURCE)
@@ -37,7 +56,7 @@ module W0RM_TopLevel_base_tb #(
     .valid(inst_valid),
     .empty(),
     .data(inst_data)
-  );
+  ); // */
   
   FileCompare #(
     .DATA_WIDTH(2 + (2 * DATA_WIDTH)),
@@ -59,7 +78,7 @@ module W0RM_TopLevel_base_tb #(
     .reset(reset),
     
     // Instruction port
-    .inst_addr_o(), // Not used
+    .inst_addr_o(inst_addr), // Not used
     .inst_valid_o(inst_req_valid),
     .inst_data_i(inst_data),
     .inst_valid_i(inst_valid),

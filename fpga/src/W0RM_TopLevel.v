@@ -361,7 +361,8 @@ decode_reg_write_addr // 4
   ) alu (
     .clk(core_clk),
     
-    .ready(execute_ready),
+    .mem_ready(mem_ready),
+    .alu_ready(execute_ready),
     
     .opcode(rfetch_alu_opcode),
     .data_valid(rfetch_valid),
@@ -426,7 +427,7 @@ decode_reg_write_addr // 4
   ) mem (
     .clk(core_clk),
     
-    .mem_ready(), // Not used
+    .mem_ready(mem_ready), // Not used
     
     .mem_output_valid(rstore_mem_result_valid),
     .mem_data_out(rstore_mem_result),
