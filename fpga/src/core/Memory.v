@@ -50,16 +50,28 @@ module W0RM_Core_Memory #(
     begin
       if (mem_valid_i)
       begin
-        pending_op    <= 1'b1;
-        mem_write_r   <= mem_write;
-        mem_read_r    <= mem_read;
-        mem_is_pop_r  <= mem_is_pop;
-        mem_data_r    <= mem_data;
-        mem_addr_r    <= mem_addr;
-        mem_valid_r   <= 1'b1;
+        if (mem_write || mem_read) // Is this an event we care about?
+        begin
+          pending_op    <= 1'b1;
+          mem_write_r   <= mem_write;
+          mem_read_r    <= mem_read;
+          mem_is_pop_r  <= mem_is_pop;
+          mem_data_r    <= mem_data;
+          mem_addr_r    <= mem_addr;
+          mem_valid_r   <= 1'b1;
+          user_data_r   <= user_data_in;
+          mem_output_valid_r  <= 1'b0;
+        end
+        else
+        begin
+          // Not a real event, just pass it through
+          user_data_r   <= user_data_in;
+          mem_output_valid_r  <= 1'b1;
+        end
       end
       else
       begin
+        // Inputs not valid
         pending_op    <= 1'b0;
         mem_write_r   <= 0;
         mem_read_r    <= 0;
@@ -67,6 +79,7 @@ module W0RM_Core_Memory #(
         mem_addr_r    <= 0;
         mem_data_r    <= 0;
         mem_result_r  <= 0;
+        mem_output_valid_r  <= 1'b0;
       end
     end
     else
@@ -92,13 +105,15 @@ module W0RM_Core_Memory #(
     end
   end
   
-  assign #0.1 data_bus_write_out = mem_write_r;
-  assign #0.1 data_bus_read_out  = mem_read_r;
-  assign #0.1 data_bus_valid_out = mem_valid_r;
-  assign #0.1 data_bus_addr_out  = mem_addr_r;
-  assign #0.1 data_bus_data_out  = mem_data_r;
+  assign #0.1 data_bus_write_out  = mem_write_r;
+  assign #0.1 data_bus_read_out   = mem_read_r;
+  assign #0.1 data_bus_valid_out  = mem_valid_r;
+  assign #0.1 data_bus_addr_out   = mem_addr_r;
+  assign #0.1 data_bus_data_out   = mem_data_r;
   
-  assign #0.1 mem_data_out       = mem_result_r;
-  assign #0.1 mem_ready          = ~pending_op;
-  assign #0.1 mem_output_valid   = mem_output_valid_r;
+  assign #0.1 mem_data_out        = mem_result_r;
+  assign #0.1 mem_ready           = ~pending_op;
+  assign #0.1 mem_output_valid    = mem_output_valid_r;
+  
+  assign #0.1 user_data_out       = user_data_r;
 endmodule

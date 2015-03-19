@@ -18,6 +18,9 @@ module W0RM_Core_RegisterFile #(
   port_write_enable,
   port_write_data,
   
+  alu_ready,
+  reg_file_ready,
+  
   reset,
   
   // User data (control, etc)
@@ -57,10 +60,15 @@ module W0RM_Core_RegisterFile #(
   input wire                        port_write_enable;
   input wire  [DATA_WIDTH - 1:0]    port_write_data;
   
+  input wire                        alu_ready;
+  output wire                       reg_file_ready;
+  
   input wire                        reset;
   
   input wire  [NUM_USER_BITS - 1:0] user_data_in;
   output wire [NUM_USER_BITS - 1:0] user_data_out;
+  
+  assign #0.1 reg_file_ready = alu_ready;
   
   // Register file
   reg [DATA_WIDTH - 1:0]  registers [NUM_REGISTERS - 1:0];

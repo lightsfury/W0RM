@@ -101,8 +101,8 @@ module W0RM_Core_Decode #(
   localparam INST_MOV_LIT_HIGH    = 7;
   localparam INST_MOV_LIT_LOW     = 0;
   localparam INST_MOV_SRC         = 12;
-  localparam INST_MOV_SRC_LIT     = 0;
-  localparam INST_MOV_SRC_REG     = 1;
+  localparam INST_MOV_SRC_LIT     = 1;
+  localparam INST_MOV_SRC_REG     = 0;
   
   localparam INST_LDSTR_TYPE      = 12;
   localparam INST_LDSTR_TYPE_LOAD = 0;
@@ -181,6 +181,8 @@ module W0RM_Core_Decode #(
     end
   endfunction
   
+  reg   bad_inst = 0;
+  
   reg   [INST_WIDTH-1:0]  instruction_r = 0;
   reg                     inst_valid_r = 0;
   
@@ -205,6 +207,23 @@ module W0RM_Core_Decode #(
   reg                     control_valid_r = 0;
   reg                     decode_ready_r = 0;
   
+  always @(posedge clk)
+  begin
+    if (fetch_ready)
+    begin
+      inst_valid_r <= 1'b0;
+      
+      if (inst_valid)
+      begin
+        instruction_r <= instruction;
+        inst_valid_r  <= 1'b1;
+      end
+    end
+  end
+  
+  assign #0.1 decode_ready = fetch_ready;
+  
+  /*
   always @(posedge clk)
   begin
     if (inst_valid_r)
@@ -245,7 +264,7 @@ module W0RM_Core_Decode #(
     begin
       inst_valid_r  <= 1'b0;
     end
-  end
+  end // */
   
   always @(*)
   begin
@@ -276,6 +295,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = 0;
           reg_write_source_r  = 0;
           reg_write_addr_r    = 0;
+          
+          bad_inst            = 0;
         end
         
         INST_IDENT_EXT:
@@ -303,6 +324,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = 1;
           reg_write_source_r  = REG_WRITE_SOURCE_ALU;
           reg_write_addr_r    = instruction_r[INST_EXT_ADDR_HIGH:INST_EXT_ADDR_LOW];
+          
+          bad_inst            = 0;
         end
         
         INST_IDENT_Bcond:
@@ -330,6 +353,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = (instruction_r[INST_Bcond_LINK] == INST_Bcond_LINK_YES);
           reg_write_source_r  = REG_WRITE_SOURCE_B;
           reg_write_addr_r    = REG_ADDR_LINK_REG;
+          
+          bad_inst            = 0;
         end
         
         INST_IDENT_MOV:
@@ -357,6 +382,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = 1;
           reg_write_source_r  = REG_WRITE_SOURCE_ALU;
           reg_write_addr_r    = instruction_r[INST_MOV_Rd_HIGH:INST_MOV_Rd_LOW];
+          
+          bad_inst            = 0;
         end
         
         INST_IDENT_LDSTR:
@@ -383,6 +410,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = (instruction_r[INST_LDSTR_TYPE] == INST_LDSTR_TYPE_LOAD);
           reg_write_source_r  = REG_WRITE_SOURCE_MEM;
           reg_write_addr_r    = instruction_r[INST_LDSTR_RD_HIGH:INST_LDSTR_RD_LOW];
+          
+          bad_inst            = 0;
         end
         
         INST_IDENT_ALU:
@@ -410,6 +439,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = 1;
           reg_write_source_r  = REG_WRITE_SOURCE_ALU;
           reg_write_addr_r    = instruction_r[INST_ALU_RD_HIGH:INST_ALU_RD_LOW];
+          
+          bad_inst            = 0;
         end
         
         INST_IDENT_SHIFT:
@@ -437,6 +468,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = 1;
           reg_write_source_r  = REG_WRITE_SOURCE_ALU;
           reg_write_addr_r    = instruction_r[INST_SHIFT_RD_HIGH:INST_SHIFT_RD_LOW];
+          
+          bad_inst            = 0;
         end
         
         INST_IDENT_RES:
@@ -463,6 +496,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = 0;
           reg_write_source_r  = 0;
           reg_write_addr_r    = 0;
+          
+          bad_inst            = 1;
         end
         
         INST_IDENT_PUPO:
@@ -489,6 +524,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = (instruction_r[INST_PUPO_TYPE] == INST_PUPO_TYPE_POP);
           reg_write_source_r  = REG_WRITE_SOURCE_MEM;
           reg_write_addr_r    = instruction_r[INST_PUPO_RD_HIGH:INST_PUPO_RD_LOW];
+          
+          bad_inst            = 0;
           
           //! @todo Do I need a 2nd register write port?
         end
@@ -518,6 +555,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = (instruction_r[INST_Bucnd_LINK] == INST_Bucnd_LINK_YES);
           reg_write_source_r  = REG_WRITE_SOURCE_B;
           reg_write_addr_r    = REG_ADDR_LINK_REG;
+          
+          bad_inst            = 0;
         end
         
         default:
@@ -544,6 +583,8 @@ module W0RM_Core_Decode #(
           reg_write_r         = 0;
           reg_write_source_r  = 0;
           reg_write_addr_r    = 0;
+          
+          bad_inst            = 1;
         end
       endcase
     end
@@ -574,5 +615,5 @@ module W0RM_Core_Decode #(
   assign #0.1 decode_reg_write_source = reg_write_source_r;
   assign #0.1 decode_reg_write_addr   = reg_write_addr_r;
   
-  assign #0.1 decode_ready = decode_ready_r;
+  //assign #0.1 decode_ready = decode_ready_r;
 endmodule
