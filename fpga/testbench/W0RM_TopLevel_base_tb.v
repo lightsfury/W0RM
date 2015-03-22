@@ -13,7 +13,6 @@ module W0RM_TopLevel_base_tb #(
   localparam INST_WIDTH = 16;
   
   reg clk = 0, reset = 1;
-  reg inst_valid_r = 0;
   
   wire  [DATA_WIDTH-1:0]  mem_data_o,
                           mem_data_i;
@@ -29,7 +28,7 @@ module W0RM_TopLevel_base_tb #(
   always #2.5 clk <= ~clk;
   
   wire  [INST_WIDTH-1:0]  inst_data;
-  wire  [ADDR_WIDTH-1:0]  inst_addr;    
+  wire  [ADDR_WIDTH-1:0]  inst_addr;
   
   FileMemory #(
     .FILE_PATH(FILE_SOURCE),

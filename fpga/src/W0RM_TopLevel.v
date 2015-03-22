@@ -298,10 +298,13 @@ decode_reg_write_addr // 4
   // Register file
   W0RM_Core_RegisterFile #(
     .SINGLE_CYCLE(SINGLE_CYCLE),
-    .NUM_USER_BITS(32 + 10 + 5 + 7 + 7 + 1)
+    .NUM_USER_BITS(32 + 10 + 5 + 7 + 7)
   ) regFile (
     .clk(core_clk),
     .reset(reset),
+    
+    .decode_valid(decode_valid),
+    .rfetch_valid(rfetch_valid),
     
     .alu_ready(execute_ready),
     .reg_file_ready(fetch_ready),
@@ -318,16 +321,14 @@ decode_reg_write_addr // 4
                    decode_memory_write, decode_memory_read, decode_memory_is_pop,
                    decode_memory_data_src, decode_memory_addr_src,
                    decode_reg_write, decode_reg_write_source,
-                   decode_reg_write_addr,
-                   decode_valid}),
+                   decode_reg_write_addr}),
     .user_data_out({rfetch_literal, rfetch_alu_op2_select, rfetch_alu_ext_8_16,
                     rfetch_alu_opcode, rfetch_alu_store_flags, rfetch_is_branch,
                     rfetch_is_cond_branch, rfetch_branch_code,
                     rfetch_memory_write, rfetch_memory_read, rfetch_memory_is_pop,
                     rfetch_memory_data_src, rfetch_memory_addr_src,
                     rfetch_reg_write, rfetch_reg_write_source,
-                    rfetch_reg_write_addr,
-                    rfetch_valid}),
+                    rfetch_reg_write_addr}),
     
     .port_write_addr(rstore_reg_write_addr),
     .port_write_enable(rstore_reg_write && rstore_mem_result_valid),

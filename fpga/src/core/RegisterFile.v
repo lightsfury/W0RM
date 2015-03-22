@@ -21,6 +21,9 @@ module W0RM_Core_RegisterFile #(
   alu_ready,
   reg_file_ready,
   
+  decode_valid,
+  rfetch_valid,
+  
   reset,
   
   // User data (control, etc)
@@ -65,6 +68,9 @@ module W0RM_Core_RegisterFile #(
   
   input wire                        reset;
   
+  input wire                        decode_valid;
+  output wire                       rfetch_valid;
+  
   input wire  [NUM_USER_BITS - 1:0] user_data_in;
   output wire [NUM_USER_BITS - 1:0] user_data_out;
   
@@ -77,10 +83,12 @@ module W0RM_Core_RegisterFile #(
                           port1_data_r = 0;
 
   reg [NUM_USER_BITS-1:0] user_data_r = 0;
+  reg                     rfetch_valid_r = 0;
                           
   assign port_read0_data  = port0_data_r;
   assign port_read1_data  = port1_data_r;
   assign user_data_out    = user_data_r;
+  assign rfetch_valid     = rfetch_valid_r;
   
   integer i;
   initial
@@ -100,7 +108,7 @@ module W0RM_Core_RegisterFile #(
     begin
       for (i = 0; i < NUM_REGISTERS; i = i + 1)
       begin
-        registers[i] = 0;
+        registers[i] <= 0;
       end
     end
     // Write action
@@ -134,6 +142,9 @@ module W0RM_Core_RegisterFile #(
       port1_data_r <= registers[port_read1_addr];
     end
     
-    user_data_r <= user_data_in;
+    if (decode_valid)
+      user_data_r <= user_data_in;
+    
+    rfetch_valid_r  <= decode_valid;
   end
 endmodule

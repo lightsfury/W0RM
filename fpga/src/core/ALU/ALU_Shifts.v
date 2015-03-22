@@ -74,7 +74,7 @@ module W0RM_ALU_Shifts #(
   begin
     for (i = 0; i < SHIFT_SIZE; i = i + 1)
     begin
-      result_i[i] = 0;
+      result_i[i] = {DATA_WIDTH{1'b0}};
     end
   end
   
