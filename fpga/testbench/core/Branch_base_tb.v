@@ -10,8 +10,8 @@ module Branch_base_tb #(
 );
   localparam FLAGS_WIDTH    = 4;
   localparam OPCODE_WIDTH   = 4;
-  localparam FS_DATA_WIDTH  = (3 * DATA_WIDTH) + 3  + 2;
-  localparam FC_DATA_WIDTH  = DATA_WIDTH;
+  localparam FS_DATA_WIDTH  = (3 * DATA_WIDTH) + 3 + 8;
+  localparam FC_DATA_WIDTH  = DATA_WIDTH + 2;
   
   reg   clk = 0;
   reg   fs_go = 0;
@@ -19,19 +19,18 @@ module Branch_base_tb #(
   reg   first_run = 1;
   wire  fs_done;
   
-  wire                    valid;
-  wire  [DATA_WIDTH-1:0]  data_a,
-                          data_b;
-  wire  [3:0]             opcode;
-  
-  wire                    result_valid;
-  wire  [DATA_WIDTH-1:0]  result;
-  wire  [FLAGS_WIDTH-1:0] result_flags;
+  wire  [DATA_WIDTH-1:0]  branch_base_addr,
+                          rn,
+                          lit,
+                          next_pc,
+                          next_link_reg;
+  wire  [2:0]             cond_branch_code;
   
   always #2.5 clk <= ~clk;
   
   initial #50 fs_pause <= 1'b0;
   
+  /*
   always @(posedge clk)
   begin
     if (fs_pause)
@@ -54,10 +53,14 @@ module Branch_base_tb #(
       end
       else
       begin
-        fs_go <= result_valid;
+        fs_go <= branch_valid;
       end
     end
   end
+  // */
+  
+  always @(posedge clk)
+    fs_go <= ~fs_pause;
   
   FileSource #(
     .DATA_WIDTH(FS_DATA_WIDTH),
@@ -77,8 +80,8 @@ module Branch_base_tb #(
     .FILE_PATH(FILE_COMPARE)
   ) compare (
     .clk(clk),
-    .valid(result_valid),
-    .data({}),
+    .valid(branch_valid),
+    .data({flush, next_pc_valid, next_pc}),
     .done(done),
     .error(error)
   );
@@ -93,7 +96,7 @@ module Branch_base_tb #(
     .mem_ready(1'b1),
     .branch_ready(branch_ready),
     
-    .data_valid(fs_valid && valid),
+    .data_valid(fs_valid && data_valid),
     .is_branch(is_branch),
     .is_cond_branch(is_cond_branch),
     .cond_branch_code(cond_branch_code),
@@ -111,8 +114,9 @@ module Branch_base_tb #(
     
     .branch_valid(branch_valid),
     .flush_pipeline(flush),
-    .next_pc(next_pc),
     .next_pc_valid(next_pc_valid),
+    .next_pc(next_pc),
+    .next_link_reg(next_link_reg),
     
     .user_data_in(1'b0),
     .user_data_out() // Not used

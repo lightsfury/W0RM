@@ -59,7 +59,7 @@ module W0RM_Core_Branch #(
   reg                     branch_valid_r = 0;
   reg   [ADDR_WIDTH-1:0]  next_pc_r = 0;
   reg                     next_pc_valid_r = 0;
-  
+  reg                     next_link_reg_r = 0;
   
   reg   [USER_WIDTH-1:0]  user_data_r = 0,
                           user_data_r2 = 0;
@@ -67,9 +67,18 @@ module W0RM_Core_Branch #(
   reg                     branch_taken = 0;
   reg                     next_pc_valid_i = 0;
   reg   [ADDR_WIDTH-1:0]  next_pc_i;
+  reg                     alu_flag_zero_r = 0,
+                          alu_flag_carry_r = 0,
+                          alu_flag_overflow_r = 0,
+                          alu_flag_negative_r = 0;
   
-  assign branch_ready = mem_ready;
-  
+  assign branch_ready   = mem_ready;
+  assign branch_valid   = branch_valid_r;
+  assign flush_pipeline = next_pc_valid_r;
+  assign next_pc_valid  = next_pc_valid_r;
+  assign next_pc        = next_pc_r;
+  assign next_link_reg  = next_link_reg_r;
+  assign user_data_out  = user_data_r2;
   
   always @(*)
   begin
@@ -79,28 +88,28 @@ module W0RM_Core_Branch #(
       begin
         case (cond_branch_code_r)
           BRANCH_COND_CODE_ZERO_SET:
-            branch_taken = alu_flag_zero == 1;
+            branch_taken = alu_flag_zero_r == 1;
           
           BRANCH_COND_CODE_ZERO_CLEAR:
-            branch_taken = alu_flag_zero == 0;
+            branch_taken = alu_flag_zero_r == 0;
             
           BRANCH_COND_CODE_CARRY_SET:
-            branch_taken = alu_flag_carry == 1;
+            branch_taken = alu_flag_carry_r == 1;
           
           BRANCH_COND_CODE_CARRY_CLEAR:
-            branch_taken = alu_flag_carry == 0;
+            branch_taken = alu_flag_carry_r == 0;
             
           BRANCH_COND_CODE_OVER_SET:
-            branch_taken = alu_flag_overflow == 1;
+            branch_taken = alu_flag_overflow_r == 1;
           
           BRANCH_COND_CODE_OVER_CLEAR:
-            branch_taken = alu_flag_overflow == 0;
+            branch_taken = alu_flag_overflow_r == 0;
             
           BRANCH_COND_CODE_NEG_SET:
-            branch_taken = alu_flag_negative == 1;
+            branch_taken = alu_flag_negative_r == 1;
           
           BRANCH_COND_CODE_NEG_CLEAR:
-            branch_taken = alu_flag_zero == 0;
+            branch_taken = alu_flag_negative_r == 0;
           
           default:
             branch_taken = 1'b0;
@@ -145,10 +154,16 @@ module W0RM_Core_Branch #(
       is_branch_r         <= is_branch;
       is_cond_branch_r    <= is_cond_branch;
       cond_branch_code_r  <= cond_branch_code;
-      base_addr_r         <= branch_base_addr_r;
-      is_rel_abs          <= branch_rel_abs;
+      base_addr_r         <= branch_base_addr;
+      is_rel_abs_r        <= branch_rel_abs;
+      rn_r                <= rn;
+      lit_r               <= lit;
+      alu_flag_zero_r     <= alu_flag_zero;
+      alu_flag_carry_r    <= alu_flag_carry;
+      alu_flag_overflow_r <= alu_flag_overflow;
+      alu_flag_negative_r <= alu_flag_negative;
       
-      user_data_r         <= user_data;
+      user_data_r         <= user_data_in;
     end
     
     if (data_valid_r && branch_ready)
@@ -158,7 +173,7 @@ module W0RM_Core_Branch #(
     
       if (branch_taken)
       begin
-        next_link_reg_r <= branch_base_addr_r + 2;
+        next_link_reg_r <= base_addr_r + 2;
         user_data_r2    <= user_data_r;
       end
       else
@@ -171,7 +186,4 @@ module W0RM_Core_Branch #(
     data_valid_r    <= data_valid && branch_ready;
     branch_valid_r  <= data_valid_r && branch_ready;
   end
-  
-  
-  
 endmodule
