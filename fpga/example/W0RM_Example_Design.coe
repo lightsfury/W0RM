@@ -12,11 +12,13 @@ A458,
 A150,
 8911,
 20F2,
-F3F6;
+F3Fa;
 
 ; Walnut Zero RISC Machine example design program
 ; This program uses a delay loop to toggle an LED
-
+;
+; NOP
+;
 ; Setup the memory address
 ; Set R4 to value 0x80000080
 ;MOV R4, #0x80

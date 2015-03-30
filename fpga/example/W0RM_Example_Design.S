@@ -1,6 +1,8 @@
 ; Walnut Zero RISC Machine example design program
 ; This program uses a delay loop to toggle an LED
 
+NOP
+
 ; Setup the memory address
 ; Set R4 to value 0x80000080
 MOV R4, #0x80
@@ -12,13 +14,13 @@ toggle_led:
 
 ; Read-modify-write the GPIO data register
 ; The GPIO data register is located at offset 0x04
-LDR R0, [R4, #4]
+LOAD R0, [R4, #4]
 XOR R0, #1
-STR R0, [R4, #4]
+STORE R0, [R4, #4]
 
 ; Set R1 to value 0x00FF0000
 MOV R1, #0xFF
-LSL R1, 16
+LSL R1, #16
 
 loop_head:
 

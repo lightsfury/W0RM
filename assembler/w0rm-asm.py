@@ -1,7 +1,8 @@
-#! /bin/python3
+#! /usr/bin/python3 -v
 
 import sys
 import re
+from functools import reduce
 
 alu_operand_to_opcode = {
   'AND': 0,
@@ -22,59 +23,111 @@ shift_operand_to_opcode = {
   'ASR': 2
 }
 
-def encode_nop(s):
+cond_branch_operand_to_opcode = {
+  'ZS': 0,
+  'ZC': 1,
+  'CS': 2,
+  'CC': 3,
+  'VS': 4,
+  'VC': 5,
+  'NS': 6,
+  'NC': 7
+}
+
+def resolve_label(label, cur_addr, labels):
+  def map_labels(x):
+    return x['label']
+  
+  def map_for_reduce(x):
+    return x if x['label']==label else None
+  
+  def reduce_labels(accum, next_entry):
+    return accum if accum is not None else next_entry
+  
+  if label in map(map_labels, labels):
+    m = map(map_for_reduce, labels)
+    r = reduce(reduce_labels, m)
+    
+    #print("resolve_label r['addr']=%x, cur_addr=%x\n" % (int(r['addr']), cur_addr))
+    
+    dist = r['addr'] - (cur_addr + 2)
+    
+    return dist
+  else:
+    #print("resolve_label: label %s not found" % label)
+    raise Exception("resolve_label: label %s not found" % label)
+    return -1
+
+def encode_nop(s, cur_addr, labels):
   return 0
 
-def encode_extend(s):
+def encode_extend(s, cur_addr, labels):
   base = 0x1000;
   
-  if s.operand[0] == 'Z':
+  if s['operand'][0] == 'Z':
     base += 0x0800
   
-  if s.operand[4] == 'H':
+  if s['operand'][4] == 'H':
     base += 0x0400
   
-  reg = int(s.params[1:])
+  reg = int(s['params'][1:])
   
   return base + (reg * 16)
 
-def encode_cond_branch(s):
-  # Figure out how to calculate branch distance
-  pass
+def encode_cond_branch(s, cur_addr, labels):
+  base = 0x2000
+  
+  lit = 0
+  
+  if 'X' in s['operand']:
+    # Branch to register address
+    param = int(s['params'][1:])
+    
+    base += 0x1000
+  else:
+    # Branch via relative jump
+    label = s['params']
+    
+    param = resolve_label(label, cur_addr, labels)
+  
+  if 'L' in s['operand']:
+    base += 0x0800
+  
+  cond_opcode = cond_branch_operand_to_opcode[s['operand'][-2:]]
+  
+  return base + (cond_opcode * 0x0100) + (param % 0x0100)
 
-def encode_mov(s):
-  opcode = alu_operand_to_opcode[s.operand]
+def encode_mov(s, cur_addr, labels):
+  params = s['params'].split(',')
   
-  params = s.params.split(',')
-  
-  rd = int(params[0][1:])
-  rn = int(params[1][1:])
+  rd = int(params[0][1:], 0)
+  rn = int(params[1][1:], 0)
   
   base = 0x4000
   
   if params[1][0] == '#':
     base += 0x1000
   
-  return base + (rd * 4096)  + rn
+  return base + (rd * 0x0100) + rn
 
-def encode_load_store(s):
+def encode_load_store(s, cur_addr, labels):
   base = 0x6000
   
-  if s.operand == 'STORE':
+  if s['operand'] == 'STORE':
     base += 0x1000
   
-  params = s.params.split(',')
+  params = s['params'].split(',')
   
   rd = int(params[0][1:])
-  rn = int(params[1][1:])
+  rn = int(params[1][2:])
   lit = int(params[2][1:-1])
   
   return base + (rd * 4096) + (rn * 256) + lit
 
-def encode_alu(s):
-  opcode = alu_operand_to_opcode[s.operand]
+def encode_alu(s, cur_addr, labels):
+  opcode = alu_operand_to_opcode[s['operand']]
   
-  params = s.params.split(',')
+  params = s['params'].split(',')
   
   rd = int(params[0][1:])
   rn = int(params[1][1:])
@@ -85,13 +138,11 @@ def encode_alu(s):
     base += 0x1000
   
   return base + (opcode * 256) + (rd * 16) + rn
-  
-  pass
 
-def encode_shift(s):
-  opcode = shift_operand_to_opcode[s.operand]
+def encode_shift(s, cur_addr, labels):
+  opcode = shift_operand_to_opcode[s['operand']]
   
-  params = s.params.split(',')
+  params = s['params'].split(',')
   
   rd = int(params[0][1:])
   rn = int(params[1][1:])
@@ -101,21 +152,38 @@ def encode_shift(s):
   if params[1][0] == 'R':
     base += 0x1000
   
-  return base + (rd * 256) + (opcode * 64) + rn
+  return base + (rd * 0x0100) + (opcode * 0x0040) + rn
 
-def encode_push_pop(s):
+def encode_push_pop(s, cur_addr, labels):
   base = 0xE000
   
-  if s.operand == 'POP':
+  if s['operand'] == 'POP':
     base += 0x0100
   
-  rd = int(s.params[1:])
+  rd = int(s['params'][1:])
   
   return base + rd
 
-def encode_branch(s):
-  # Figure out how to calculate branch distance
-  pass
+def encode_branch(s, cur_addr, labels):
+  base = 0xF000
+  
+  lit = 0
+  
+  if 'X' in s['operand']:
+    # Branch to register address
+    param = int(s['params'][1:])
+    
+    base += 0x0800
+  else:
+    # Branch via relative jump
+    label = s['params']
+    
+    param = resolve_label(label, cur_addr, labels)
+  
+  if 'L' in s['operand']:
+    base += 0x0400
+  
+  return base + (param % 0x0400)
 
 operands = {
   'NOP': encode_nop,
@@ -179,13 +247,81 @@ def normalize_params(lines):
   return new_lines
 
 def strip_extra_spaces(lines):
-  c = re.compile(r'^\s*([A-Za-z]+\s?[A-Za-z,#0-9_\[\]]*)\s*$')
+  c = re.compile(r'^\s*([A-Za-z]+\s?[A-Za-z,#0-9_\[\]]*)[\s\r\n]*$')
   new_lines = [c.sub(r'\1', line) for line in lines]
   return new_lines
 
 def extract_mnemonic(lines):
-  c = re.compile(r'^([A-Za-z]{1,5})\s?([A-Za-z,#0-9_\[\]]*)$')
+  c = re.compile(r'^([A-Za-z]{1,5})\s+?([A-Za-z,#0-9_\[\]]*)$')
   m = [c.match(line) for line in lines]
-  p = [{'operand': k.group(1).upper, 'params': k.group(2)} for k in m if k]
+  p = [{'operand': k.group(1).upper(), 'params': k.group(2)} for k in m if k]
   return p
 
+def extract_labels(lines, start_address = 0):
+  c = re.compile(r'^([A-Za-z_]+):$')
+  labels = []
+  new_lines = []
+  i = start_address
+  
+  for line in lines:
+    g = c.match(line)
+    if g:
+      labels.append({'addr':i, 'label':g.group(1)})
+    else:
+      new_lines.append(line)
+      i += 2
+  
+  return (labels, new_lines)
+
+def encode_assembly(lines, labels, start_address = 0):
+  i = start_address
+  values = []
+  
+  for line in lines:
+    op = line['operand']
+    f = operands[op]
+    v = f(line, i, labels)
+    #v = operands[line['operand']](line, i, labels)
+    i += 2
+    values.append(v)
+    
+  encoded_values = ['%0.4x' % v for v in values]
+  
+  return encoded_values
+
+def run_assembler(input_file, output_file, output_type = 'coe'):
+  with open(input_file) as f:
+    lines = f.readlines()
+  
+  lines = strip_comments(lines)
+  lines = strip_empty_lines(lines)
+  lines = normalize_params(lines)
+  lines = strip_extra_spaces(lines)
+  (labels, lines) = extract_labels(lines)
+  #print(labels)
+  print(lines)
+  lines = extract_mnemonic(lines)
+  print(lines)
+  lines = encode_assembly(lines, labels)
+  
+  with open(output_file, 'w') as f:
+    if output_type == 'coe':
+      f.write('memory_initialization_radix=16;\nmemory_initialization_vector=\n')
+      include_comma = True
+    
+    for i in range(len(lines)):
+      f.write(lines[i])
+      
+      if include_comma:
+        if (i + 1) == len(lines):
+          f.write(";")
+        else:
+          f.write(",\n")
+      else:
+        f.write("\n")
+
+if __name__=="__main__":
+  import sys
+  print(sys.argv)
+  run_assembler(sys.argv[1], sys.argv[2])
+  
