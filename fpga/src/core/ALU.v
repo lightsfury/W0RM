@@ -8,6 +8,7 @@ module W0RM_Core_ALU #(
   input wire                    clk,
   // Operation port
   input wire  [3:0]             opcode,
+  input wire                    flush,
   // Control port
   input wire                    mem_ready,
   output wire                   alu_ready,
@@ -105,45 +106,58 @@ module W0RM_Core_ALU #(
   begin
     data_valid_r <= data_valid;
     
-    if (data_valid && ~pending_op)
+    if (flush)
     begin
-      opcode_r    <= opcode;
-      data_a_r    <= data_a;
-      data_b_r    <= data_b;
-      pending_op  <= 1'b1;
-      user_data_r <= user_data_in;
+      data_valid_r  <= 1'b0;
+      pending_op    <= 1'b0;
+      opcode_r      <= 0;
+      data_a_r      <= {DATA_WIDTH{1'b0}};
+      data_b_r      <= {DATA_WIDTH{1'b0}};
+      user_data_r   <= {USER_WIDTH{1'b0}};
     end
-    
-    if ((single_cycle || result_valid_i) && pending_op)
+    else
     begin
-      pending_op <= 1'b0;
       
-      result_r  <= result_i;
-      
-      user_data_r2 <= user_data_r;
-      
-      if (store_flags_mask[0])
+      if (data_valid && ~pending_op)
       begin
-        result_flags_r[0] <= result_flags_i[0];
+        opcode_r    <= opcode;
+        data_a_r    <= data_a;
+        data_b_r    <= data_b;
+        pending_op  <= 1'b1;
+        user_data_r <= user_data_in;
       end
       
-      if (store_flags_mask[1])
+      if ((single_cycle || result_valid_i) && pending_op)
       begin
-        result_flags_r[1] <= result_flags_i[1];
+        pending_op <= 1'b0;
+        
+        result_r  <= result_i;
+        
+        user_data_r2 <= user_data_r;
+        
+        if (store_flags_mask[0])
+        begin
+          result_flags_r[0] <= result_flags_i[0];
+        end
+        
+        if (store_flags_mask[1])
+        begin
+          result_flags_r[1] <= result_flags_i[1];
+        end
+        
+        if (store_flags_mask[2])
+        begin
+          result_flags_r[2] <= result_flags_i[2];
+        end
+        
+        if (store_flags_mask[3])
+        begin
+          result_flags_r[3] <= result_flags_i[3];
+        end
       end
       
-      if (store_flags_mask[2])
-      begin
-        result_flags_r[2] <= result_flags_i[2];
-      end
-      
-      if (store_flags_mask[3])
-      begin
-        result_flags_r[3] <= result_flags_i[3];
-      end
+      result_valid_r <= result_valid_i;
     end
-    
-    result_valid_r <= result_valid_i;
   end
   
   always @(*)
@@ -343,7 +357,7 @@ module W0RM_Core_ALU #(
           result_i        <= result_shifts;
           result_valid_i  <= result_valid_shifts;
           result_flags_i  <= result_flags_shifts;
-          single_cycle    <= 1'b1;
+          single_cycle    <= 1'b0;
         end
         
         ALU_OPCODE_LSL:
@@ -358,7 +372,7 @@ module W0RM_Core_ALU #(
           result_i        <= result_shifts;
           result_valid_i  <= result_valid_shifts;
           result_flags_i  <= result_flags_shifts;
-          single_cycle    <= 1'b1;
+          single_cycle    <= 1'b0;
         end
         
         ALU_OPCODE_ASR:
@@ -373,7 +387,7 @@ module W0RM_Core_ALU #(
           result_i        <= result_shifts;
           result_valid_i  <= result_valid_shifts;
           result_flags_i  <= result_flags_shifts;
-          single_cycle    <= 1'b1;
+          single_cycle    <= 1'b0;
         end
         
         ALU_OPCODE_MOV:

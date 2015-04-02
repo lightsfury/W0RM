@@ -4,6 +4,7 @@
 struct gpio_t
 {
   int enable,
+      control,
       input_data,
       output_data;
 };
@@ -12,6 +13,9 @@ void main(void)
 {
   struct gpio_t* gpio_a = (struct gpio_t*)(0x80000080);
   int   delay;
+  
+  gpio_a->control = 0xff;
+  gpio_a->enable  = 0xff;
   
   while (1)
   {

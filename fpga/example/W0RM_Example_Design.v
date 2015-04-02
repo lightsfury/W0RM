@@ -10,6 +10,7 @@ module W0RM_Example_Design(
   localparam ADDR_WIDTH = 32;
   wire  [INST_WIDTH-1:0]  inst_data_i;
   wire  [DATA_WIDTH-1:0]  inst_data;
+  wire  [ADDR_WIDTH-1:0]  inst_addr_o;
   reg   [ADDR_WIDTH-1:0]  inst_addr_r = 0;
   reg                     inst_valid_i = 0;
   
@@ -17,6 +18,10 @@ module W0RM_Example_Design(
   wire  [DATA_WIDTH-1:0]  mem_data_o,
                           mem_data_i;
   reg                     mem_valid_i = 0;
+  wire  [DATA_WIDTH-1:0]  gpio_data_i;
+  wire                    gpio_valid_i;
+  wire  [DATA_WIDTH-1:0]  bus_data_i;
+  wire                    bus_valid_i;
 
   IBUFG sysclk_bufg(
     .I(sysclk),
@@ -90,8 +95,23 @@ module W0RM_Example_Design(
     .mem_read_o(mem_read_o),
     .mem_write_o(mem_write_o),
     .mem_valid_o(mem_valid_o),
-    .mem_data_i(mem_data_i),
-    .mem_valid_i(mem_valid_i)
+    .mem_data_i(bus_data_i),
+    .mem_valid_i(bus_valid_i)
+  );
+  
+  //! @todo Until I make a "smart" memory wrapper, the core memory should be the
+  //! "low priority" device
+  W0RM_Peripheral_Bus_Extender bus_extender(
+    .bus_clock(core_clk),
+    
+    .bus_port1_valid_i(mem_valid_i),
+    .bus_port1_data_i(mem_data_i),
+    
+    .bus_port0_valid_i(gpio_valid_i),
+    .bus_port0_data_i(gpio_data_i),
+    
+    .bus_valid_o(bus_valid_i),
+    .bus_data_o(bus_data_i)
   );
   
   W0RM_CoreRAM_Block main_memory(
@@ -113,5 +133,25 @@ module W0RM_Example_Design(
   
   always @(posedge core_clk)
     mem_valid_i <= mem_valid_o;
+  
+  W0RM_Peripheral_GPIO #(
+    .DATA_WIDTH(DATA_WIDTH),
+    .ADDR_WIDTH(ADDR_WIDTH),
+    .GPIO_WIDTH(8),
+    .BASE_ADDR(32'h80000080)
+  ) gpio_a (
+    .mem_clk(core_clk),
+    
+    .mem_valid_i(mem_valid_o),
+    .mem_read_i(mem_read_o),
+    .mem_write_i(mem_write_o),
+    .mem_addr_i(mem_addr_o),
+    .mem_data_i(mem_data_o),
+    
+    .mem_valid_o(gpio_valid_i),
+    .mem_data_o(gpio_data_i),
+    
+    .pin_gpio_pad(leds)
+  );
 
 endmodule

@@ -8,8 +8,11 @@ module W0RM_Core_Decode #(
 )(
   input wire                    clk,
   
+  input wire                    flush,
+  
   input wire  [INST_WIDTH-1:0]  instruction,
   input wire                    inst_valid,
+  input wire  [DATA_WIDTH-1:0]  inst_addr,
   
   input wire                    fetch_ready,
   output wire                   decode_ready,
@@ -28,6 +31,7 @@ module W0RM_Core_Decode #(
   output wire                   decode_is_branch,
                                 decode_is_cond_branch,
   output wire [2:0]             decode_branch_code,
+  output wire [DATA_WIDTH-1:0]  decode_branch_base_addr,
   // Memory stage
   output wire                   decode_memory_write,
                                 decode_memory_read,
@@ -181,10 +185,17 @@ module W0RM_Core_Decode #(
     end
   endfunction
   
+  function [DATA_WIDTH-1:0] sign_extend_11(input reg[10:0] d);
+    begin
+      sign_extend_11 = {{21{d[10]}}, d[10:0]};
+    end
+  endfunction
+  
   reg   bad_inst = 0;
   
   reg   [INST_WIDTH-1:0]  instruction_r = 0;
   reg                     inst_valid_r = 0;
+  reg   [DATA_WIDTH-1:0]  inst_addr_r = 0;
   
   reg   [ADDR_WIDTH-1:0]  rd_addr_r = 0,
                           rn_addr_r = 0;
@@ -209,13 +220,20 @@ module W0RM_Core_Decode #(
   
   always @(posedge clk)
   begin
-    if (fetch_ready)
+    if (flush)
+    begin
+      instruction_r <= {INST_WIDTH{1'b0}};
+      inst_addr_r   <= {DATA_WIDTH{1'b0}};
+      inst_valid_r  <= 1'b0;
+    end
+    else if (fetch_ready)
     begin
       inst_valid_r <= 1'b0;
       
       if (inst_valid)
       begin
         instruction_r <= instruction;
+        inst_addr_r   <= inst_addr;
         inst_valid_r  <= 1'b1;
       end
     end
@@ -296,7 +314,7 @@ module W0RM_Core_Decode #(
           reg_write_source_r  = 0;
           reg_write_addr_r    = 0;
           
-          bad_inst            = 0;
+          bad_inst            = 1;
         end
         
         INST_IDENT_EXT:
@@ -461,7 +479,7 @@ module W0RM_Core_Decode #(
           
           memory_write_r      = 0;
           memory_read_r       = 0;
-          memory_data_src_r  = 0;
+          memory_data_src_r   = 0;
           memory_addr_src_r   = 0;
           memory_is_pop_r     = 0;
           
@@ -534,7 +552,7 @@ module W0RM_Core_Decode #(
         begin
           rd_addr_r           = 0;
           rn_addr_r           = instruction_r[INST_Bucnd_RD_HIGH:INST_Bucnd_RD_LOW];
-          literal_r           = instruction_r[INST_Bucnd_LIT_HIGH:INST_Bucnd_LIT_LOW];
+          literal_r           = sign_extend_11(instruction_r[INST_Bucnd_LIT_HIGH:INST_Bucnd_LIT_LOW]);
           
           alu_op2_select_r    = (instruction_r[INST_Bucnd_SRC] == INST_Bucnd_SRC_REG)
                               ? ALU_OP2_SOURCE_REG : ALU_OP2_SOURCE_LIT;
@@ -590,7 +608,7 @@ module W0RM_Core_Decode #(
     end
   end
   
-  assign #0.1 control_valid           = inst_valid_r;
+  assign #0.1 control_valid           = inst_valid_r && ~bad_inst;
   
   assign #0.1 decode_rd_addr          = rd_addr_r;
   assign #0.1 decode_rn_addr          = rn_addr_r;
@@ -604,6 +622,7 @@ module W0RM_Core_Decode #(
   assign #0.1 decode_is_branch        = is_branch_r;
   assign #0.1 decode_is_cond_branch   = is_cond_branch_r;
   assign #0.1 decode_branch_code      = branch_code_r;
+  assign #0.1 decode_branch_base_addr = inst_addr_r;
   
   assign #0.1 decode_memory_write     = memory_write_r;
   assign #0.1 decode_memory_read      = memory_read_r;

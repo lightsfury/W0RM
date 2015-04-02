@@ -133,7 +133,7 @@ module W0RM_Core_Branch #(
       next_pc_valid_i = 1;
       if (is_rel_abs_r == BRANCH_IS_RELATIVE)
       begin
-        next_pc_i = base_addr_r + lit_r;
+        next_pc_i = base_addr_r + lit_r + 2;
       end
       else // Absolute address
       begin
@@ -180,6 +180,22 @@ module W0RM_Core_Branch #(
       begin
         next_link_reg_r <= {DATA_WIDTH{1'b0}};
         user_data_r2    <= {USER_WIDTH{1'b0}};
+      end
+      
+      if (~(data_valid && is_branch && branch_ready))
+      begin
+        is_branch_r         <= 1'b0;
+        is_cond_branch_r    <= 1'b0;
+        cond_branch_code_r  <= 3'd0;
+        base_addr_r         <= {DATA_WIDTH{1'b0}};
+        is_rel_abs_r        <= 1'b0;
+        rn_r                <= {DATA_WIDTH{1'b0}};
+        lit_r               <= {DATA_WIDTH{1'b0}};
+        alu_flag_zero_r     <= 1'b0;
+        alu_flag_carry_r    <= 1'b0;
+        alu_flag_overflow_r <= 1'b0;
+        alu_flag_negative_r <= 1'b0;
+        
       end
     end
     

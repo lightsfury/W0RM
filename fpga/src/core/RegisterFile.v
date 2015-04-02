@@ -4,9 +4,10 @@ module W0RM_Core_RegisterFile #(
   parameter SINGLE_CYCLE  = 0,
   parameter DATA_WIDTH    = 32,
   parameter NUM_REGISTERS = 16,
-  parameter NUM_USER_BITS = 64
+  parameter USER_WIDTH = 64
 )(
   clk,
+  flush,
   // Read port 0
   port_read0_addr,
   port_read0_data,
@@ -48,31 +49,32 @@ module W0RM_Core_RegisterFile #(
   
   localparam REG_ADDR_BITS = log2(NUM_REGISTERS);
 
-  input wire                        clk;
+  input wire                        clk,
+                                    flush;
   
   // Read port 0
-  input wire  [REG_ADDR_BITS - 1:0] port_read0_addr;
-  output wire [DATA_WIDTH - 1:0]    port_read0_data;
+  input wire  [REG_ADDR_BITS-1:0] port_read0_addr;
+  output wire [DATA_WIDTH-1:0]    port_read0_data;
   
   // Read port 1
-  input wire  [REG_ADDR_BITS - 1:0] port_read1_addr;
-  output wire [DATA_WIDTH - 1:0]    port_read1_data;
+  input wire  [REG_ADDR_BITS-1:0] port_read1_addr;
+  output wire [DATA_WIDTH-1:0]    port_read1_data;
   
   // Write port
-  input wire  [REG_ADDR_BITS - 1:0] port_write_addr;
-  input wire                        port_write_enable;
-  input wire  [DATA_WIDTH - 1:0]    port_write_data;
+  input wire  [REG_ADDR_BITS-1:0] port_write_addr;
+  input wire                      port_write_enable;
+  input wire  [DATA_WIDTH-1:0]    port_write_data;
   
-  input wire                        alu_ready;
-  output wire                       reg_file_ready;
+  input wire                      alu_ready;
+  output wire                     reg_file_ready;
   
-  input wire                        reset;
+  input wire                      reset;
   
-  input wire                        decode_valid;
-  output wire                       rfetch_valid;
+  input wire                      decode_valid;
+  output wire                     rfetch_valid;
   
-  input wire  [NUM_USER_BITS - 1:0] user_data_in;
-  output wire [NUM_USER_BITS - 1:0] user_data_out;
+  input wire  [USER_WIDTH-1:0]    user_data_in;
+  output wire [USER_WIDTH-1:0]    user_data_out;
   
   assign #0.1 reg_file_ready = alu_ready;
   
@@ -82,7 +84,7 @@ module W0RM_Core_RegisterFile #(
   reg [DATA_WIDTH - 1:0]  port0_data_r = 0,
                           port1_data_r = 0;
 
-  reg [NUM_USER_BITS-1:0] user_data_r = 0;
+  reg [USER_WIDTH-1:0] user_data_r = 0;
   reg                     rfetch_valid_r = 0;
                           
   assign port_read0_data  = port0_data_r;
@@ -142,9 +144,19 @@ module W0RM_Core_RegisterFile #(
       port1_data_r <= registers[port_read1_addr];
     end
     
-    if (decode_valid)
-      user_data_r <= user_data_in;
-    
-    rfetch_valid_r  <= decode_valid;
+    if (flush)
+    begin
+      user_data_r     <= {USER_WIDTH{1'b0}};
+      rfetch_valid_r  <= 1'b0;
+    end
+    else if (decode_valid)
+    begin
+      user_data_r     <= user_data_in;
+      rfetch_valid_r  <= 1'b1;
+    end
+    else
+    begin
+      rfetch_valid_r <= decode_valid;
+    end
   end
 endmodule

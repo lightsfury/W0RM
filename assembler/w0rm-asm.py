@@ -1,4 +1,4 @@
-#! /usr/bin/python3 -v
+#! /usr/bin/python3 
 
 import sys
 import re
@@ -122,7 +122,9 @@ def encode_load_store(s, cur_addr, labels):
   rn = int(params[1][2:])
   lit = int(params[2][1:-1])
   
-  return base + (rd * 4096) + (rn * 256) + lit
+  print("load/store: rd=%d rn=%d lit=%d" % (rd, rn, lit))
+  
+  return base + (rd * 0x0100) + (rn * 0x0010) + lit
 
 def encode_alu(s, cur_addr, labels):
   opcode = alu_operand_to_opcode[s['operand']]
@@ -299,9 +301,9 @@ def run_assembler(input_file, output_file, output_type = 'coe'):
   lines = strip_extra_spaces(lines)
   (labels, lines) = extract_labels(lines)
   #print(labels)
-  print(lines)
+  #print(lines)
   lines = extract_mnemonic(lines)
-  print(lines)
+  #print(lines)
   lines = encode_assembly(lines, labels)
   
   with open(output_file, 'w') as f:
@@ -322,6 +324,6 @@ def run_assembler(input_file, output_file, output_type = 'coe'):
 
 if __name__=="__main__":
   import sys
-  print(sys.argv)
+  #print(sys.argv)
   run_assembler(sys.argv[1], sys.argv[2])
   
