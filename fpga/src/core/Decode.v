@@ -185,9 +185,9 @@ module W0RM_Core_Decode #(
     end
   endfunction
   
-  function [DATA_WIDTH-1:0] sign_extend_11(input reg[10:0] d);
+  function [DATA_WIDTH-1:0] sign_extend_10(input reg[9:0] d);
     begin
-      sign_extend_11 = {{21{d[10]}}, d[10:0]};
+      sign_extend_10 = {{22{d[9]}}, d[9:0]};
     end
   endfunction
   
@@ -552,7 +552,7 @@ module W0RM_Core_Decode #(
         begin
           rd_addr_r           = 0;
           rn_addr_r           = instruction_r[INST_Bucnd_RD_HIGH:INST_Bucnd_RD_LOW];
-          literal_r           = sign_extend_11(instruction_r[INST_Bucnd_LIT_HIGH:INST_Bucnd_LIT_LOW]);
+          literal_r           = sign_extend_10(instruction_r[INST_Bucnd_LIT_HIGH:INST_Bucnd_LIT_LOW]);
           
           alu_op2_select_r    = (instruction_r[INST_Bucnd_SRC] == INST_Bucnd_SRC_REG)
                               ? ALU_OP2_SOURCE_REG : ALU_OP2_SOURCE_LIT;

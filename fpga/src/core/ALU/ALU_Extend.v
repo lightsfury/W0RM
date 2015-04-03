@@ -29,6 +29,8 @@ module W0RM_ALU_Extend #(
   
   reg   [DATA_WIDTH-1:0]  result_r = 0;
   reg                     result_valid_r = 0;
+  reg   [DATA_WIDTH-1:0]  result_i = 0;
+  reg                     result_valid_i = 0;
   
   assign result_flags[ALU_FLAG_ZERO]  = result_r == 0;
   assign result_flags[ALU_FLAG_NEG]   = result_r[MSB];
@@ -38,8 +40,9 @@ module W0RM_ALU_Extend #(
   assign result = result_r;
   assign result_valid = result_valid_r;
   
-  always @(posedge clk)
+  always @(*)
   begin
+    result_valid_i = data_valid;
     if (data_valid)
     begin
       case (opcode)
@@ -48,12 +51,12 @@ module W0RM_ALU_Extend #(
           if (ext_8_16)
           begin
             // 16-bit
-            result_r  <= {{16{data_a[15]}}, data_a[15:0]};
+            result_i  = {{16{data_a[15]}}, data_a[15:0]};
           end
           else
           begin
             // 8-bit
-            result_r  <= {{24{data_a[7]}}, data_a[7:0]};
+            result_i  = {{24{data_a[7]}}, data_a[7:0]};
           end
         end
         
@@ -62,22 +65,83 @@ module W0RM_ALU_Extend #(
           if (ext_8_16)
           begin
             // 16-bit
-            result_r  <= {16'd0, data_a[15:0]};
+            result_i  = {16'd0, data_a[15:0]};
           end
           else
           begin
             // 8-bit
-            result_r  <= {24'd0, data_a[7:0]};
+            result_i  = {24'd0, data_a[7:0]};
           end
         end
         
         default:
         begin
-          result_r <= 0;
+          result_i    = 0;
         end
       endcase
     end
-    
-    result_valid_r  <= data_valid;
+    else
+    begin
+      result_i = {DATA_WIDTH{1'b0}};
+    end
   end
+  
+  generate
+    if (SINGLE_CYCLE)
+    begin
+      always @(*)
+      begin
+        result_r        = result_i;
+        result_valid_r  = result_i;
+      end
+    end
+    else
+    begin
+      always @(posedge clk)
+      begin
+        result_r <= result_i;
+        result_valid_r <= result_valid_i;
+        /*
+        if (data_valid)
+        begin
+          case (opcode)
+            ALU_OPCODE_SEX:
+            begin
+              if (ext_8_16)
+              begin
+                // 16-bit
+                result_r  <= {{16{data_a[15]}}, data_a[15:0]};
+              end
+              else
+              begin
+                // 8-bit
+                result_r  <= {{24{data_a[7]}}, data_a[7:0]};
+              end
+            end
+            
+            ALU_OPCODE_ZEX:
+            begin
+              if (ext_8_16)
+              begin
+                // 16-bit
+                result_r  <= {16'd0, data_a[15:0]};
+              end
+              else
+              begin
+                // 8-bit
+                result_r  <= {24'd0, data_a[7:0]};
+              end
+            end
+            
+            default:
+            begin
+              result_r <= 0;
+            end
+          endcase
+        end
+        
+        result_valid_r  <= data_valid; // */
+      end
+    end
+  endgenerate
 endmodule

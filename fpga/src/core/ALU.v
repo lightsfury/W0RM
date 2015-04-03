@@ -117,7 +117,6 @@ module W0RM_Core_ALU #(
     end
     else
     begin
-      
       if (data_valid && ~pending_op)
       begin
         opcode_r    <= opcode;
@@ -177,7 +176,7 @@ module W0RM_Core_ALU #(
           result_i        <= result_logic;
           result_valid_i  <= result_valid_logic;
           result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b1;
+          single_cycle    <= 1'b0;
         end
         
         ALU_OPCODE_OR:
@@ -192,7 +191,7 @@ module W0RM_Core_ALU #(
           result_i        <= result_logic;
           result_valid_i  <= result_valid_logic;
           result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b1;
+          single_cycle    <= 1'b0;
         end
         
         ALU_OPCODE_XOR:
@@ -207,7 +206,7 @@ module W0RM_Core_ALU #(
           result_i        <= result_logic;
           result_valid_i  <= result_valid_logic;
           result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b1;
+          single_cycle    <= 1'b0;
         end
         
         ALU_OPCODE_NOT:
@@ -222,7 +221,7 @@ module W0RM_Core_ALU #(
           result_i        <= result_logic;
           result_valid_i  <= result_valid_logic;
           result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b1;
+          single_cycle    <= 1'b0;
         end
         
         ALU_OPCODE_NEG:
@@ -237,7 +236,7 @@ module W0RM_Core_ALU #(
           result_i        <= result_logic;
           result_valid_i  <= result_valid_logic;
           result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b1;
+          single_cycle    <= 1'b0;
         end
         
         ALU_OPCODE_MUL:

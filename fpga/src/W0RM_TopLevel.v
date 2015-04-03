@@ -1,7 +1,7 @@
 `timescale 1ns/100ps
 
 module W0RM_TopLevel #(
-  parameter SINGLE_CYCLE  = 0,
+  parameter SINGLE_CYCLE  = 1,
   parameter INST_CACHE    = 0,
   parameter INST_WIDTH    = 16,
   parameter DATA_WIDTH    = 32,

@@ -38,7 +38,7 @@ module W0RM_Core_IFetch #(
                               flush_next_inst_r2 = 0;
       
       assign reg_pc         = reg_pc_r;
-      assign inst_valid_out = inst_valid_in && ~(reset || flush_next_inst_r2 || flush_next_inst_r);
+      assign inst_valid_out = inst_valid_in && ~(reset);
       assign inst_data_out  = inst_data_in;
       assign ifetch_ready   = decode_ready && ~reset;
       assign reg_pc_valid   = decode_ready && ~reset;

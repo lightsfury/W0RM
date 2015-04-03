@@ -87,6 +87,54 @@ module W0RM_ALU_Shifts #(
   assign result = result_r;
   assign result_valid = result_valid_r;
   
+  generate
+    if (SINGLE_CYCLE)
+    begin
+      always @(*)
+      begin
+        data_valid_r1 = data_valid;
+        
+        if (data_valid)
+        begin
+          opcode_r    = opcode;
+          data_a_r    = data_a;
+          data_b_r    = data_b;
+          result_i[0] = data_a;
+        end
+        else
+        begin
+          opcode_r    = 4'd0;
+          data_a_r    = {DATA_WIDTH{1'b0}};
+          data_b_r    = {DATA_WIDTH{1'b0}};
+          result_i[0] = {DATA_WIDTH{1'b0}};
+        end
+        
+        data_valid_r1   = data_valid;
+        result_valid_r  = data_valid_r1;
+        result_r        = result_i[SHIFT_SIZE];
+        
+      end
+    end
+    else
+    begin
+      always @(posedge clk)
+      begin
+        if (data_valid)
+        begin
+          opcode_r      <= opcode;
+          data_a_r      <= data_a;
+          data_b_r      <= data_b;
+          
+          result_i[0]   <= data_a;
+        end
+        
+        data_valid_r1   <= data_valid;
+        result_valid_r  <= data_valid_r1;
+        result_r        <= result_i[SHIFT_SIZE];
+      end
+    end
+  endgenerate
+  
   always @(posedge clk)
   begin
     if (data_valid)

@@ -32,7 +32,9 @@ module W0RM_ALU_Logic #(
   reg [DATA_WIDTH-1:0]  result_r = 0,
                         data_a_r = 0,
                         data_b_r = 0;
-  reg                   result_valid_r = 0;
+  reg                   result_valid_r  = 0;
+  reg [DATA_WIDTH-1:0]  result_i        = 0;
+  reg                   result_valid_i  = 0;
   
   assign result       = result_r;
   assign result_valid = result_valid_r;
@@ -43,40 +45,103 @@ module W0RM_ALU_Logic #(
                                         (result_r[MSB] && (~data_a_r[MSB]) && (~data_b_r[MSB]));
   assign result_flags[ALU_FLAG_CARRY] = 1'b0; // Carry not defined for logic ops
   
-  always @(posedge clk)
+  always @(*)
   begin
-    result_valid_r <= data_valid;
+    result_valid_i = data_valid;
+    
     if (data_valid)
     begin
-      data_a_r <= data_a;
-      data_b_r <= data_b;
-      
       case (opcode)
         ALU_OPCODE_AND:
         begin
-          result_r <= data_a & data_b;
+          result_i = data_a & data_b;
         end
         
         ALU_OPCODE_OR:
         begin
-          result_r <= data_a | data_b;
+          result_i = data_a | data_b;
         end
         
         ALU_OPCODE_XOR:
         begin
-          result_r <= data_a ^ data_b;
+          result_i = data_a ^ data_b;
         end
         
         ALU_OPCODE_NOT:
         begin
-          result_r <= ~data_a;
+          result_i = ~data_a;
         end
         
         ALU_OPCODE_NEG:
         begin
-          result_r <= ~data_a + 1;
+          result_i = ~data_a + 1;
+        end
+        
+        default:
+        begin
+          result_i  = {DATA_WIDTH{1'b0}};
         end
       endcase
     end
+    else
+    begin
+      result_i = {DATA_WIDTH{1'b0}};
+    end
   end
+  
+  generate
+    if (SINGLE_CYCLE)
+    begin
+      always @(*)
+      begin
+        data_a_r        = data_a;
+        data_b_r        = data_b;
+        result_r        = result_i;
+        result_valid_r  = result_valid_i;
+      end
+    end
+    else
+    begin
+      always @(posedge clk)
+      begin
+        result_valid_r <= data_valid;
+        if (data_valid)
+        begin
+          data_a_r  <= data_a;
+          data_b_r  <= data_b;
+          
+          result_r  <= result_i;
+          
+          /*
+          case (opcode)
+            ALU_OPCODE_AND:
+            begin
+              result_r <= data_a & data_b;
+            end
+            
+            ALU_OPCODE_OR:
+            begin
+              result_r <= data_a | data_b;
+            end
+            
+            ALU_OPCODE_XOR:
+            begin
+              result_r <= data_a ^ data_b;
+            end
+            
+            ALU_OPCODE_NOT:
+            begin
+              result_r <= ~data_a;
+            end
+            
+            ALU_OPCODE_NEG:
+            begin
+              result_r <= ~data_a + 1;
+            end
+          endcase
+          // */
+        end
+      end
+    end
+  endgenerate
 endmodule
