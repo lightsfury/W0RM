@@ -48,9 +48,9 @@ def resolve_label(label, cur_addr, labels):
     m = map(map_for_reduce, labels)
     r = reduce(reduce_labels, m)
     
-    #print("resolve_label r['addr']=%x, cur_addr=%x\n" % (int(r['addr']), cur_addr))
-    
     dist = r['addr'] - (cur_addr + 2)
+    
+    print("resolve_label (%s) r['addr']=%x, cur_addr=%x dist=%d\n" % (label, int(r['addr']), cur_addr, dist))
     
     return dist
   else:
@@ -94,6 +94,9 @@ def encode_cond_branch(s, cur_addr, labels):
     base += 0x0800
   
   cond_opcode = cond_branch_operand_to_opcode[s['operand'][-2:]]
+  
+  if param > 0xff:
+    raise BaseException("Conditional branch distance too large (%d) for branch instruction at address 0x%0.8x" % (param, cur_addr))
   
   return base + (cond_opcode * 0x0100) + (param % 0x0100)
 
@@ -185,7 +188,10 @@ def encode_branch(s, cur_addr, labels):
   if 'L' in s['operand']:
     base += 0x0400
   
-  return base + (param % 0x0400)
+  if param > 0x3ff:
+    raise BaseException("Unconditional branch distance too large (%d) for branch instruction at address 0x%0.8x" % (param, cur_addr))
+  else:
+    return base + (param % 0x0400)
 
 operands = {
   'NOP': encode_nop,
@@ -249,12 +255,12 @@ def normalize_params(lines):
   return new_lines
 
 def strip_extra_spaces(lines):
-  c = re.compile(r'^\s*([A-Za-z]+\s?[A-Za-z,#0-9_\[\]]*)[\s\r\n]*$')
+  c = re.compile(r'^\s*([A-Za-z]+\s*?[A-Za-z,#0-9_\[\]]*)[\s\r\n]*$')
   new_lines = [c.sub(r'\1', line) for line in lines]
   return new_lines
 
 def extract_mnemonic(lines):
-  c = re.compile(r'^([A-Za-z]{1,5})\s+?([A-Za-z,#0-9_\[\]]*)$')
+  c = re.compile(r'^([A-Za-z]{1,5})\s*?([A-Za-z,#0-9_\[\]]*)$')
   m = [c.match(line) for line in lines]
   p = [{'operand': k.group(1).upper(), 'params': k.group(2)} for k in m if k]
   return p
@@ -291,7 +297,7 @@ def encode_assembly(lines, labels, start_address = 0):
   
   return encoded_values
 
-def run_assembler(input_file, output_file, output_type = 'coe'):
+def run_assembler(input_file, output_file, output_type = 'coe', output_width = 32):
   with open(input_file) as f:
     lines = f.readlines()
   
@@ -310,17 +316,22 @@ def run_assembler(input_file, output_file, output_type = 'coe'):
     if output_type == 'coe':
       f.write('memory_initialization_radix=16;\nmemory_initialization_vector=\n')
       include_comma = True
+  
+      bits = 0
     
     for i in range(len(lines)):
       f.write(lines[i])
+      bits += 16
       
-      if include_comma:
-        if (i + 1) == len(lines):
-          f.write(";")
+      if bits >= output_width:
+        if include_comma:
+          if (i + 1) == len(lines):
+            f.write(";")
+          else:
+            f.write(",\n")
         else:
-          f.write(",\n")
-      else:
-        f.write("\n")
+          f.write("\n");
+        bits = 0
 
 if __name__=="__main__":
   import sys
