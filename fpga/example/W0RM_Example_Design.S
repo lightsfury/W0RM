@@ -63,6 +63,10 @@ NOP
 NOP
 ; Setup the GPIO as outputs
 STORE R0, [R4, #4]
+NOP
+NOP
+NOP
+NOP
 ; Enable the GPIO pins
 STORE R0, [R4, #0]
 NOP
@@ -107,7 +111,7 @@ NOP
 NOP
 
 ; Set R1 to value 0x00FF0000
-MOV R1, #0xFF
+MOV R1, #0x4
 NOP
 NOP
 NOP
@@ -116,15 +120,15 @@ NOP
 NOP
 NOP
 NOP
-LSL R1, #16
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
-NOP
+; LSL R1, #16
+; NOP
+; NOP
+; NOP
+; NOP
+; NOP
+; NOP
+; NOP
+; NOP
 
 loop_head:
 
@@ -160,3 +164,4 @@ NOP
 NOP
 
 ADD R15,#0
+NOP
