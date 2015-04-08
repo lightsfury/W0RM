@@ -55,8 +55,7 @@ module W0RM_Core_ALU #(
                           data_b_r = 0,
                           result_r = 0;
   reg                     data_valid_r = 0,
-                          result_valid_r = 0,
-                          pending_op = 0;
+                          result_valid_r = 0;
   reg   [3:0]             result_flags_r = 0,
                           store_flags_mask_r = 0;
   
@@ -92,19 +91,15 @@ module W0RM_Core_ALU #(
   
   reg   [USER_WIDTH-1:0]  user_data_r = 0,
                           user_data_r2 = 0;
-  reg                     single_cycle = 0;
   reg                     long_opcode = 0;
   reg                     ext_bit_size_r = 0;
   
-  //assign result         = result_r;
-  //assign result_valid   = result_valid_r;
   assign #0.1 result         = result_i;
   assign #0.1 result_valid   = result_valid_i && data_valid_r;
   assign #0.1 flag_zero      = result_flags_r[ALU_FLAG_ZERO];
   assign #0.1 flag_negative  = result_flags_r[ALU_FLAG_NEG];
   assign #0.1 flag_overflow  = result_flags_r[ALU_FLAG_OVER];
   assign #0.1 flag_carry     = result_flags_r[ALU_FLAG_CARRY];
-  //assign alu_ready      = ~pending_op || (pending_op && single_cycle && mem_ready);
   assign alu_ready      = mem_ready && (~long_opcode || result_valid_i);
   assign user_data_out  = user_data_r;
   
@@ -161,64 +156,6 @@ module W0RM_Core_ALU #(
     end
   end
   
-  /*
-  always @(posedge clk)
-  begin
-    data_valid_r <= data_valid;
-    
-    if (flush)
-    begin
-      data_valid_r  <= 1'b0;
-      pending_op    <= 1'b0;
-      opcode_r      <= 0;
-      data_a_r      <= {DATA_WIDTH{1'b0}};
-      data_b_r      <= {DATA_WIDTH{1'b0}};
-      user_data_r   <= {USER_WIDTH{1'b0}};
-    end
-    else
-    begin
-      if (data_valid && ~pending_op)
-      begin
-        opcode_r    <= opcode;
-        data_a_r    <= data_a;
-        data_b_r    <= data_b;
-        pending_op  <= 1'b1;
-        user_data_r <= user_data_in;
-      end
-      
-      if ((single_cycle || result_valid_i) && pending_op)
-      begin
-        pending_op <= 1'b0;
-        
-        result_r  <= result_i;
-        
-        user_data_r2 <= user_data_r;
-        
-        if (store_flags_mask[0])
-        begin
-          result_flags_r[0] <= result_flags_i[0];
-        end
-        
-        if (store_flags_mask[1])
-        begin
-          result_flags_r[1] <= result_flags_i[1];
-        end
-        
-        if (store_flags_mask[2])
-        begin
-          result_flags_r[2] <= result_flags_i[2];
-        end
-        
-        if (store_flags_mask[3])
-        begin
-          result_flags_r[3] <= result_flags_i[3];
-        end
-      end
-      
-      result_valid_r <= result_valid_i;
-    end
-  end // */
-  
   always @(*)
   begin
     if (data_valid_r)
@@ -226,290 +163,273 @@ module W0RM_Core_ALU #(
       case (opcode_r)
         ALU_OPCODE_AND:
         begin
-          ce_logic    <= 1'b1;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b1;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_logic;
-          result_valid_i  <= result_valid_logic;
-          result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_logic;
+          result_valid_i  = result_valid_logic;
+          result_flags_i  = result_flags_logic;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_OR:
         begin
-          ce_logic    <= 1'b1;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b1;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_logic;
-          result_valid_i  <= result_valid_logic;
-          result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_logic;
+          result_valid_i  = result_valid_logic;
+          result_flags_i  = result_flags_logic;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_XOR:
         begin
-          ce_logic    <= 1'b1;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b1;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_logic;
-          result_valid_i  <= result_valid_logic;
-          result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_logic;
+          result_valid_i  = result_valid_logic;
+          result_flags_i  = result_flags_logic;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_NOT:
         begin
-          ce_logic    <= 1'b1;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b1;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_logic;
-          result_valid_i  <= result_valid_logic;
-          result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_logic;
+          result_valid_i  = result_valid_logic;
+          result_flags_i  = result_flags_logic;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_NEG:
         begin
-          ce_logic    <= 1'b1;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b1;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_logic;
-          result_valid_i  <= result_valid_logic;
-          result_flags_i  <= result_flags_logic;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_logic;
+          result_valid_i  = result_valid_logic;
+          result_flags_i  = result_flags_logic;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_MUL:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b1;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b1;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_mul;
-          result_valid_i  <= result_valid_mul;
-          result_flags_i  <= result_flags_mul;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b1;
+          result_i        = result_mul;
+          result_valid_i  = result_valid_mul;
+          result_flags_i  = result_flags_mul;
+          long_opcode     = 1'b1;
         end
         
         ALU_OPCODE_DIV:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b1;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b1;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_div_rem;
-          result_valid_i  <= result_valid_div_rem;
-          result_flags_i  <= result_flags_div_rem;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b1;
+          result_i        = result_div_rem;
+          result_valid_i  = result_valid_div_rem;
+          result_flags_i  = result_flags_div_rem;
+          long_opcode     = 1'b1;
         end
         
         ALU_OPCODE_REM:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b1;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b1;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_div_rem;
-          result_valid_i  <= result_valid_div_rem;
-          result_flags_i  <= result_flags_div_rem;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b1;
+          result_i        = result_div_rem;
+          result_valid_i  = result_valid_div_rem;
+          result_flags_i  = result_flags_div_rem;
+          long_opcode     = 1'b1;
         end
         
         ALU_OPCODE_ADD:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b1;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b1;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_add_sub;
-          result_valid_i  <= result_valid_add_sub;
-          result_flags_i  <= result_flags_add_sub;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_add_sub;
+          result_valid_i  = result_valid_add_sub;
+          result_flags_i  = result_flags_add_sub;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_SUB:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b1;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b1;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_add_sub;
-          result_valid_i  <= result_valid_add_sub;
-          result_flags_i  <= result_flags_add_sub;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_add_sub;
+          result_valid_i  = result_valid_add_sub;
+          result_flags_i  = result_flags_add_sub;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_SEX:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b1;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b1;
           
-          result_i        <= result_ext;
-          result_valid_i  <= result_valid_ext;
-          result_flags_i  <= result_flags_ext;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_ext;
+          result_valid_i  = result_valid_ext;
+          result_flags_i  = result_flags_ext;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_ZEX:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b1;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b1;
           
-          result_i        <= result_ext;
-          result_valid_i  <= result_valid_ext;
-          result_flags_i  <= result_flags_ext;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_ext;
+          result_valid_i  = result_valid_ext;
+          result_flags_i  = result_flags_ext;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_LSR:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b1;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b1;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_shifts;
-          result_valid_i  <= result_valid_shifts;
-          result_flags_i  <= result_flags_shifts;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_shifts;
+          result_valid_i  = result_valid_shifts;
+          result_flags_i  = result_flags_shifts;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_LSL:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b1;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b1;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_shifts;
-          result_valid_i  <= result_valid_shifts;
-          result_flags_i  <= result_flags_shifts;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_shifts;
+          result_valid_i  = result_valid_shifts;
+          result_flags_i  = result_flags_shifts;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_ASR:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b1;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b1;
+          ce_ext      = 1'b0;
           
-          result_i        <= result_shifts;
-          result_valid_i  <= result_valid_shifts;
-          result_flags_i  <= result_flags_shifts;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = result_shifts;
+          result_valid_i  = result_valid_shifts;
+          result_flags_i  = result_flags_shifts;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         ALU_OPCODE_MOV:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= data_b_r;
-          result_valid_i  <= data_valid_r;
-          result_flags_i  <= 0;
-          single_cycle    <= 1'b1;
-          long_opcode     <= 1'b0;
+          result_i        = data_b_r;
+          result_valid_i  = data_valid_r;
+          result_flags_i  = 0;
+          long_opcode     = SINGLE_CYCLE;
         end
         
         default:
         begin
-          ce_logic    <= 1'b0;
-          ce_mul      <= 1'b0;
-          ce_div_rem  <= 1'b0;
-          ce_add_sub  <= 1'b0;
-          ce_shifts   <= 1'b0;
-          ce_ext      <= 1'b0;
+          ce_logic    = 1'b0;
+          ce_mul      = 1'b0;
+          ce_div_rem  = 1'b0;
+          ce_add_sub  = 1'b0;
+          ce_shifts   = 1'b0;
+          ce_ext      = 1'b0;
           
-          result_i        <= 0;
-          result_valid_i  <= 0;
-          result_flags_i  <= 0;
-          single_cycle    <= 1'b0;
-          long_opcode     <= 1'b0;
+          result_i        = 0;
+          result_valid_i  = 0;
+          result_flags_i  = 0;
+          long_opcode     = SINGLE_CYCLE;
         end
       endcase
     end
     else
     begin
-      ce_logic    <= 1'b0;
-      ce_mul      <= 1'b0;
-      ce_div_rem  <= 1'b0;
-      ce_add_sub  <= 1'b0;
-      ce_shifts   <= 1'b0;
-      ce_ext      <= 1'b0;
+      ce_logic    = 1'b0;
+      ce_mul      = 1'b0;
+      ce_div_rem  = 1'b0;
+      ce_add_sub  = 1'b0;
+      ce_shifts   = 1'b0;
+      ce_ext      = 1'b0;
       
-      result_i        <= 0;
-      result_valid_i  <= 0;
-      result_flags_i  <= 0;
-      single_cycle <= 1'b0;
+      result_i        = 0;
+      result_valid_i  = 0;
+      result_flags_i  = 0;
+      long_opcode     = 0;
     end
   end
   

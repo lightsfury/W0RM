@@ -111,35 +111,6 @@ module W0RM_ALU_Logic #(
           data_b_r  <= data_b;
           
           result_r  <= result_i;
-          
-          /*
-          case (opcode)
-            ALU_OPCODE_AND:
-            begin
-              result_r <= data_a & data_b;
-            end
-            
-            ALU_OPCODE_OR:
-            begin
-              result_r <= data_a | data_b;
-            end
-            
-            ALU_OPCODE_XOR:
-            begin
-              result_r <= data_a ^ data_b;
-            end
-            
-            ALU_OPCODE_NOT:
-            begin
-              result_r <= ~data_a;
-            end
-            
-            ALU_OPCODE_NEG:
-            begin
-              result_r <= ~data_a + 1;
-            end
-          endcase
-          // */
         end
       end
     end

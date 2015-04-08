@@ -101,46 +101,6 @@ module W0RM_ALU_Extend #(
       begin
         result_r <= result_i;
         result_valid_r <= result_valid_i;
-        /*
-        if (data_valid)
-        begin
-          case (opcode)
-            ALU_OPCODE_SEX:
-            begin
-              if (ext_8_16)
-              begin
-                // 16-bit
-                result_r  <= {{16{data_a[15]}}, data_a[15:0]};
-              end
-              else
-              begin
-                // 8-bit
-                result_r  <= {{24{data_a[7]}}, data_a[7:0]};
-              end
-            end
-            
-            ALU_OPCODE_ZEX:
-            begin
-              if (ext_8_16)
-              begin
-                // 16-bit
-                result_r  <= {16'd0, data_a[15:0]};
-              end
-              else
-              begin
-                // 8-bit
-                result_r  <= {24'd0, data_a[7:0]};
-              end
-            end
-            
-            default:
-            begin
-              result_r <= 0;
-            end
-          endcase
-        end
-        
-        result_valid_r  <= data_valid; // */
       end
     end
   endgenerate

@@ -30,6 +30,7 @@ module W0RM_ALU_AddSub #(
                           data_a_r = 0,
                           data_b_r = 0;
   reg                     flag_carry_r = 0,
+                          flag_carry_i = 0,
                           result_valid_r = 0;
   wire  [DATA_WIDTH-1:0]  add_sub_result;
   wire                    flag_carry;
@@ -48,13 +49,16 @@ module W0RM_ALU_AddSub #(
   begin
     case (opcode)
       ALU_OPCODE_ADD:
-        result_i  = (data_a + data_b);
+        {flag_carry_i, result_i}  = (data_a + data_b);
       
       ALU_OPCODE_SUB:
-        result_i  = (data_a + ~data_b) + 1;
+        {flag_carry_i, result_i}  = (data_a + ~data_b) + 1;
       
       default:
-        result_i  = {DATA_WIDTH{1'b0}};
+      begin
+        result_i      = {DATA_WIDTH{1'b0}};
+        flag_carry_i  = 0;
+      end
     endcase
   end
   
@@ -68,6 +72,7 @@ module W0RM_ALU_AddSub #(
         result_valid_r  = data_valid;
         data_a_r        = data_a;
         data_b_r        = data_b;
+        flag_carry_r    = flag_carry_i;
       end
     end
     else
@@ -78,10 +83,11 @@ module W0RM_ALU_AddSub #(
         
         if (data_valid)
         begin
-          data_a_r  <= data_a;
-          data_b_r  <= data_b;
+          data_a_r      <= data_a;
+          data_b_r      <= data_b;
           
-          result_r  <= result_i;
+          result_r      <= result_i;
+          flag_carry_r  <= flag_carry_i;
         end
       end
     end
