@@ -3,10 +3,18 @@
 
 struct gpio_t
 {
-  int enable,
-      control,
-      input_data,
-      output_data;
+  uint32_t  enable,
+            control,
+            input_data,
+            output_data;
+};
+
+struct counter_t
+{
+  uint32_t  control,
+            timer,
+            load,
+            reset;
 };
 
 void main(void)

@@ -92,7 +92,7 @@ module W0RM_ALU_Extend #(
       always @(*)
       begin
         result_r        = result_i;
-        result_valid_r  = result_i;
+        result_valid_r  = result_valid_i;
       end
     end
     else

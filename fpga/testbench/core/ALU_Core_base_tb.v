@@ -18,6 +18,7 @@ module ALU_Core_base_tb #(
   reg   fs_pause = 1;
   reg   first_run = 1;
   wire  fs_done;
+  reg   alu_ready_r = 0;
   
   wire                    valid;
   wire  [DATA_WIDTH-1:0]  data_a,
@@ -32,6 +33,7 @@ module ALU_Core_base_tb #(
   
   initial #50 fs_pause <= 1'b0;
   
+  /*
   always @(posedge clk)
   begin
     if (fs_pause)
@@ -54,18 +56,21 @@ module ALU_Core_base_tb #(
       end
       else
       begin
-        fs_go <= result_valid;
+        fs_go <= alu_ready;
       end
     end
-  end
+  end // */
+  
+  always @(posedge clk)
+    alu_ready_r <= alu_ready;
   
   FileSource #(
     .DATA_WIDTH(FS_DATA_WIDTH),
     .FILE_PATH(FILE_SOURCE)
   ) source (
     .clk(clk),
-    .ready(fs_go),
-    .valid(valid),
+    .ready(alu_ready && ~fs_pause),
+    .valid(fs_valid),
     .empty(fs_done),
     .data({data_valid, ext_8_16, opcode, data_a, data_b})
   );
@@ -82,12 +87,16 @@ module ALU_Core_base_tb #(
   );
   
   W0RM_Core_ALU #(
-    .SINGLE_CYCLE(0),
+    .SINGLE_CYCLE(1),
     .DATA_WIDTH(DATA_WIDTH)
   ) dut (
     .clk(clk),
     
-    .data_valid(valid & data_valid),
+    .flush(1'b0),
+    .mem_ready(1'b1),
+    .alu_ready(alu_ready),
+    
+    .data_valid((fs_valid || ~alu_ready_r) && data_valid),
     .opcode(opcode),
     .store_flags_mask(4'h0),
     .ext_bit_size(ext_8_16),
