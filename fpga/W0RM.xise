@@ -16,7 +16,7 @@
 
   <files>
     <file xil_pn:name="src/W0RM_TopLevel.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="18"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="16"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="src/core/ALU.v" xil_pn:type="FILE_VERILOG">
@@ -40,7 +40,7 @@
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="testbench/FileCompare.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="17"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="9"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="9"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="9"/>
@@ -272,7 +272,7 @@
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="121"/>
     </file>
     <file xil_pn:name="ipcore_dir/W0RM_CoreRAM_Block.xco" xil_pn:type="FILE_COREGEN">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="19"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="20"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="ipcore_dir/W0RM_CoreRAM_Slice.xco" xil_pn:type="FILE_COREGEN">
@@ -356,32 +356,32 @@
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="169"/>
     </file>
     <file xil_pn:name="testbench/W0RM_TopLevel_base_tb.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="20"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="171"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="171"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="171"/>
     </file>
     <file xil_pn:name="testbench/W0RM_TopLevel_1_tb.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="21"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="174"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="174"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="174"/>
     </file>
     <file xil_pn:name="testbench/FileMemory.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="16"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="100"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="100"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="100"/>
     </file>
     <file xil_pn:name="example/W0RM_Example_Design.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="21"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="example/W0RM_Example_Design.ucf" xil_pn:type="FILE_UCF">
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="ipcore_dir/W0RM_Example_Design_Instruction_ROM.xco" xil_pn:type="FILE_COREGEN">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="19"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="testbench/core/Branch_1_tb.v" xil_pn:type="FILE_VERILOG">
@@ -397,13 +397,13 @@
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="180"/>
     </file>
     <file xil_pn:name="example/W0RM_Example_Design_tb.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="22"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="187"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="187"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="187"/>
     </file>
     <file xil_pn:name="src/peripheral/GPIO.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="17"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="testbench/peripheral/gpio/GPIO_base_tb.v" xil_pn:type="FILE_VERILOG">
@@ -425,7 +425,7 @@
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="199"/>
     </file>
     <file xil_pn:name="src/peripheral/Bus_Extender.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="18"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
     </file>
     <file xil_pn:name="src/peripheral/Counter.v" xil_pn:type="FILE_VERILOG">
@@ -443,6 +443,34 @@
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="202"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="202"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="202"/>
+    </file>
+    <file xil_pn:name="src/W0RM_Synchro.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="Implementation" xil_pn:seqID="208"/>
+    </file>
+    <file xil_pn:name="testbench/W0RM_Sync_base_tb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="PostMapSimulation" xil_pn:seqID="209"/>
+      <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="209"/>
+      <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="209"/>
+    </file>
+    <file xil_pn:name="testbench/W0RM_Sync_1_tb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="PostMapSimulation" xil_pn:seqID="211"/>
+      <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="211"/>
+      <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="211"/>
+    </file>
+    <file xil_pn:name="testbench/W0RM_Sync_ALU_base_tb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="PostMapSimulation" xil_pn:seqID="216"/>
+      <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="216"/>
+      <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="216"/>
+    </file>
+    <file xil_pn:name="testbench/W0RM_Sync_ALU_1_tb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="PostMapSimulation" xil_pn:seqID="218"/>
+      <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="218"/>
+      <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="218"/>
     </file>
     <file xil_pn:name="ipcore_dir/W0RM_Int_AddSub.xise" xil_pn:type="FILE_COREGENISE">
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
@@ -705,8 +733,8 @@
     <property xil_pn:name="Safe Implementation" xil_pn:value="No" xil_pn:valueState="default"/>
     <property xil_pn:name="Security" xil_pn:value="Enable Readback and Reconfiguration" xil_pn:valueState="default"/>
     <property xil_pn:name="SelectMAP Abort Sequence" xil_pn:value="Enable" xil_pn:valueState="default"/>
-    <property xil_pn:name="Selected Module Instance Name" xil_pn:value="/W0RM_TopLevel_1_tb" xil_pn:valueState="non-default"/>
-    <property xil_pn:name="Selected Simulation Root Source Node Behavioral" xil_pn:value="work.W0RM_TopLevel_1_tb" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Selected Module Instance Name" xil_pn:value="/W0RM_Example_Design_tb" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Selected Simulation Root Source Node Behavioral" xil_pn:value="work.W0RM_Example_Design_tb" xil_pn:valueState="non-default"/>
     <property xil_pn:name="Selected Simulation Root Source Node Post-Map" xil_pn:value="" xil_pn:valueState="default"/>
     <property xil_pn:name="Selected Simulation Root Source Node Post-Route" xil_pn:value="" xil_pn:valueState="default"/>
     <property xil_pn:name="Selected Simulation Root Source Node Post-Translate" xil_pn:value="" xil_pn:valueState="default"/>
@@ -722,7 +750,7 @@
     <property xil_pn:name="Slice Packing" xil_pn:value="true" xil_pn:valueState="default"/>
     <property xil_pn:name="Slice Utilization Ratio" xil_pn:value="100" xil_pn:valueState="default"/>
     <property xil_pn:name="Specify 'define Macro Name and Value" xil_pn:value="" xil_pn:valueState="default"/>
-    <property xil_pn:name="Specify Top Level Instance Names Behavioral" xil_pn:value="work.W0RM_TopLevel_1_tb" xil_pn:valueState="default"/>
+    <property xil_pn:name="Specify Top Level Instance Names Behavioral" xil_pn:value="work.W0RM_Example_Design_tb" xil_pn:valueState="default"/>
     <property xil_pn:name="Specify Top Level Instance Names Post-Map" xil_pn:value="Default" xil_pn:valueState="default"/>
     <property xil_pn:name="Specify Top Level Instance Names Post-Route" xil_pn:value="Default" xil_pn:valueState="default"/>
     <property xil_pn:name="Specify Top Level Instance Names Post-Translate" xil_pn:value="Default" xil_pn:valueState="default"/>
@@ -775,7 +803,7 @@
     <!--                                                                                  -->
     <!-- The following properties are for internal use only. These should not be modified.-->
     <!--                                                                                  -->
-    <property xil_pn:name="PROP_BehavioralSimTop" xil_pn:value="Module|W0RM_TopLevel_1_tb" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="PROP_BehavioralSimTop" xil_pn:value="Module|W0RM_Example_Design_tb" xil_pn:valueState="non-default"/>
     <property xil_pn:name="PROP_DesignName" xil_pn:value="W0RM" xil_pn:valueState="non-default"/>
     <property xil_pn:name="PROP_DevFamilyPMName" xil_pn:value="virtex5" xil_pn:valueState="default"/>
     <property xil_pn:name="PROP_FPGAConfiguration" xil_pn:value="FPGAConfiguration" xil_pn:valueState="default"/>

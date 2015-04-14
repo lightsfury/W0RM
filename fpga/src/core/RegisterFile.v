@@ -76,7 +76,7 @@ module W0RM_Core_RegisterFile #(
   input wire  [USER_WIDTH-1:0]    user_data_in;
   output wire [USER_WIDTH-1:0]    user_data_out;
   
-  assign #0.1 reg_file_ready = alu_ready;
+  assign reg_file_ready = alu_ready;
   
   // Register file
   reg [DATA_WIDTH - 1:0]  registers [NUM_REGISTERS - 1:0];
@@ -87,10 +87,10 @@ module W0RM_Core_RegisterFile #(
   reg [USER_WIDTH-1:0] user_data_r = 0;
   reg                     rfetch_valid_r = 0;
                           
-  assign port_read0_data  = port0_data_r;
-  assign port_read1_data  = port1_data_r;
-  assign user_data_out    = user_data_r;
-  assign rfetch_valid     = rfetch_valid_r;
+  assign #0.1 port_read0_data  = port0_data_r;
+  assign #0.1 port_read1_data  = port1_data_r;
+  assign #0.1 user_data_out    = user_data_r;
+  assign #0.1 rfetch_valid     = rfetch_valid_r;
   
   integer i;
   initial
@@ -149,7 +149,20 @@ module W0RM_Core_RegisterFile #(
       user_data_r     <= {USER_WIDTH{1'b0}};
       rfetch_valid_r  <= 1'b0;
     end
-    else if (decode_valid)
+    else if (alu_ready)
+    begin
+      if (decode_valid)
+      begin
+        user_data_r     <= user_data_in;
+        rfetch_valid_r  <= 1'b1;
+      end
+      else
+      begin
+        user_data_r     <= {USER_WIDTH{1'b0}};
+        rfetch_valid_r  <= 1'b0;
+      end
+    end /*
+    else if (decode_valid && alu_ready)
     begin
       user_data_r     <= user_data_in;
       rfetch_valid_r  <= 1'b1;
@@ -157,6 +170,6 @@ module W0RM_Core_RegisterFile #(
     else
     begin
       rfetch_valid_r <= decode_valid;
-    end
+    end // */
   end
 endmodule

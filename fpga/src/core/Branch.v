@@ -36,8 +36,8 @@ module W0RM_Core_Branch #(
   input wire  [USER_WIDTH-1:0]  user_data_in,
   output wire [USER_WIDTH-1:0]  user_data_out
 );
-  localparam BRANCH_IS_ABSOLUTE = 0;
-  localparam BRANCH_IS_RELATIVE = 1;
+  localparam BRANCH_IS_ABSOLUTE = 1;
+  localparam BRANCH_IS_RELATIVE = 0;
   
   localparam BRANCH_COND_CODE_ZERO_SET    = 0;
   localparam BRANCH_COND_CODE_ZERO_CLEAR  = 1;
@@ -149,57 +149,78 @@ module W0RM_Core_Branch #(
   
   always @(posedge clk)
   begin
-    if (data_valid && is_branch && branch_ready)
+    if (flush_pipeline)
     begin
-      is_branch_r         <= is_branch;
-      is_cond_branch_r    <= is_cond_branch;
-      cond_branch_code_r  <= cond_branch_code;
-      base_addr_r         <= branch_base_addr;
-      is_rel_abs_r        <= branch_rel_abs;
-      rn_r                <= rn;
-      lit_r               <= lit;
-      alu_flag_zero_r     <= alu_flag_zero;
-      alu_flag_carry_r    <= alu_flag_carry;
-      alu_flag_overflow_r <= alu_flag_overflow;
-      alu_flag_negative_r <= alu_flag_negative;
-      
-      user_data_r         <= user_data_in;
+      next_pc_r           <= 0;
+      next_pc_valid_r     <= 0;
+      is_branch_r         <= 0;
+      is_cond_branch_r    <= 0;
+      cond_branch_code_r  <= 0;
+      base_addr_r         <= 0;
+      is_rel_abs_r        <= 0;
+      rn_r                <= 0;
+      lit_r               <= 0;
+      alu_flag_zero_r     <= 0;
+      alu_flag_carry_r    <= 0;
+      alu_flag_overflow_r <= 0;
+      alu_flag_negative_r <= 0;
+      user_data_r         <= {USER_WIDTH{1'b0}};
+      user_data_r2        <= {USER_WIDTH{1'b0}};
     end
-    
-    if (data_valid_r && branch_ready)
+    else
     begin
-      next_pc_r       <= next_pc_i;
-      next_pc_valid_r <= next_pc_valid_i;
-    
-      if (branch_taken)
+      if (data_valid && is_branch && branch_ready)
       begin
-        next_link_reg_r <= base_addr_r + 2;
-        user_data_r2    <= user_data_r;
-      end
-      else
-      begin
-        next_link_reg_r <= {DATA_WIDTH{1'b0}};
-        user_data_r2    <= {USER_WIDTH{1'b0}};
-      end
-      
-      if (~(data_valid && is_branch && branch_ready))
-      begin
-        is_branch_r         <= 1'b0;
-        is_cond_branch_r    <= 1'b0;
-        cond_branch_code_r  <= 3'd0;
-        base_addr_r         <= {DATA_WIDTH{1'b0}};
-        is_rel_abs_r        <= 1'b0;
-        rn_r                <= {DATA_WIDTH{1'b0}};
-        lit_r               <= {DATA_WIDTH{1'b0}};
-        alu_flag_zero_r     <= 1'b0;
-        alu_flag_carry_r    <= 1'b0;
-        alu_flag_overflow_r <= 1'b0;
-        alu_flag_negative_r <= 1'b0;
+        is_branch_r         <= is_branch;
+        is_cond_branch_r    <= is_cond_branch;
+        cond_branch_code_r  <= cond_branch_code;
+        base_addr_r         <= branch_base_addr;
+        is_rel_abs_r        <= branch_rel_abs;
+        rn_r                <= rn;
+        lit_r               <= lit;
+        alu_flag_zero_r     <= alu_flag_zero;
+        alu_flag_carry_r    <= alu_flag_carry;
+        alu_flag_overflow_r <= alu_flag_overflow;
+        alu_flag_negative_r <= alu_flag_negative;
         
+        user_data_r         <= user_data_in;
       end
+      
+      if (data_valid_r && branch_ready)
+      begin
+        next_pc_r       <= next_pc_i;
+        next_pc_valid_r <= next_pc_valid_i;
+      
+        if (branch_taken)
+        begin
+          next_link_reg_r <= base_addr_r + 2;
+          user_data_r2    <= user_data_r;
+        end
+        else
+        begin
+          next_link_reg_r <= {DATA_WIDTH{1'b0}};
+          user_data_r2    <= {USER_WIDTH{1'b0}};
+        end
+        
+        if (~(data_valid && is_branch && branch_ready))
+        begin
+          is_branch_r         <= 1'b0;
+          is_cond_branch_r    <= 1'b0;
+          cond_branch_code_r  <= 3'd0;
+          base_addr_r         <= {DATA_WIDTH{1'b0}};
+          is_rel_abs_r        <= 1'b0;
+          rn_r                <= {DATA_WIDTH{1'b0}};
+          lit_r               <= {DATA_WIDTH{1'b0}};
+          alu_flag_zero_r     <= 1'b0;
+          alu_flag_carry_r    <= 1'b0;
+          alu_flag_overflow_r <= 1'b0;
+          alu_flag_negative_r <= 1'b0;
+          
+        end
+      end
+      
+      data_valid_r    <= data_valid && branch_ready;
+      branch_valid_r  <= data_valid_r && branch_ready;
     end
-    
-    data_valid_r    <= data_valid && branch_ready;
-    branch_valid_r  <= data_valid_r && branch_ready;
   end
 endmodule

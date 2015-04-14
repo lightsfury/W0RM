@@ -65,7 +65,7 @@ module W0RM_Core_Memory #(
         else
         begin
           // Not a real event, just pass it through
-          user_data_r   <= user_data_in;
+          user_data_r         <= user_data_in;
           mem_output_valid_r  <= 1'b1;
         end
       end
@@ -77,7 +77,7 @@ module W0RM_Core_Memory #(
         mem_read_r    <= 0;
         mem_is_pop_r  <= 0;
         mem_addr_r    <= 0;
-        mem_data_r    <= 0;
+        mem_data_r    <= mem_data_r; // For forwarding
         mem_result_r  <= 0;
         mem_output_valid_r  <= 1'b0;
       end
@@ -95,7 +95,7 @@ module W0RM_Core_Memory #(
           mem_result_r  <= {DATA_WIDTH{1'b0}};
         end
         
-        // Implement is pop functionality
+        //! @todo Implement is_pop functionality
         
         mem_output_valid_r  <= 1'b1;
         pending_op          <= 1'b0;

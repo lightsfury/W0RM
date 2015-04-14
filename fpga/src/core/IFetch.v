@@ -34,15 +34,16 @@ module W0RM_Core_IFetch #(
     if (ENABLE_CACHE == 0)
     begin
       reg   [ADDR_WIDTH-1:0]  reg_pc_r = START_PC, inst_addr_r = 0;
+      reg   [INST_WIDTH-1:0]  inst_data_r = 0;
       reg                     flush_next_inst_r = 0,
                               flush_next_inst_r2 = 0;
       
-      assign reg_pc         = reg_pc_r;
-      assign inst_valid_out = inst_valid_in && ~(reset);
-      assign inst_data_out  = inst_data_in;
-      assign ifetch_ready   = decode_ready && ~reset;
-      assign reg_pc_valid   = decode_ready && ~reset;
-      assign inst_addr_out  = inst_addr_r;
+      assign #0.1 reg_pc         = reg_pc_r;
+      assign #0.1 inst_valid_out = inst_valid_in && ~(reset || flush_next_inst_r);
+      assign #0.1 inst_data_out  = inst_data_in;
+      assign #0.1 ifetch_ready   = decode_ready && ~reset;
+      assign #0.1 reg_pc_valid   = decode_ready && ~reset;
+      assign #0.1 inst_addr_out  = inst_addr_r;
       
       always @(posedge clk)
       begin
@@ -58,10 +59,20 @@ module W0RM_Core_IFetch #(
         end
         else if (inst_valid_in)
         begin
-          reg_pc_r            <= reg_pc_r + 2;
-          inst_addr_r         <= reg_pc_r;
-          flush_next_inst_r   <= 1'b0;
-          flush_next_inst_r2  <= flush_next_inst_r;
+          if (decode_ready)
+          begin
+            reg_pc_r            <= reg_pc_r + 2;
+            inst_addr_r         <= reg_pc_r;
+            inst_data_r         <= inst_data_in;
+            flush_next_inst_r   <= 1'b0;
+            flush_next_inst_r2  <= flush_next_inst_r;
+          end
+          else
+          begin
+            reg_pc_r          <= inst_addr_r;
+            inst_addr_r       <= inst_addr_r;
+            inst_data_r       <= inst_data_r;
+          end
         end
       end
     

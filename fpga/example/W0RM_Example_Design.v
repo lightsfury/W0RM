@@ -22,6 +22,7 @@ module W0RM_Example_Design(
   wire                    gpio_valid_i;
   wire  [DATA_WIDTH-1:0]  bus_data_i;
   wire                    bus_valid_i;
+  reg   [INST_WIDTH-1:0]  inst_data_r = 0;
 
   IBUFG sysclk_bufg(
     .I(sysclk),
@@ -33,14 +34,9 @@ module W0RM_Example_Design(
     .O(reset_i)
   );
   
-  FDCPE reset_ff(
-    .C(core_clk),
-    .CE(1'b1),
-    .PRE(1'b0),
-    .CLR(1'b0),
-    .D(reset_i),
-    .Q(reset_r)
-  );
+  reg reset_r = 1;
+  always @(posedge core_clk)
+    reset_r <= reset_i;
   
   W0RM_Example_Design_Instruction_ROM example_rom(
     .clka(core_clk),
@@ -56,6 +52,7 @@ module W0RM_Example_Design(
   begin
     inst_valid_i  <= inst_valid_o;
     inst_addr_r   <= inst_addr_o;
+    inst_data_r   <= inst_data_i;
   end
   
   /*
@@ -80,7 +77,7 @@ module W0RM_Example_Design(
 
   W0RM_TopLevel #(
     .INST_CACHE(0),
-    .SINGLE_CYCLE(0)
+    .SINGLE_CYCLE(1)
   ) w0rm (
     .core_clk(core_clk),
     .reset(reset_r),
@@ -141,6 +138,7 @@ module W0RM_Example_Design(
     .BASE_ADDR(32'h80000080)
   ) gpio_a (
     .mem_clk(core_clk),
+    .cpu_reset(cpu_reset),
     
     .mem_valid_i(mem_valid_o),
     .mem_read_i(mem_read_o),
