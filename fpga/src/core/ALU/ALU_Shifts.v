@@ -135,6 +135,7 @@ module W0RM_ALU_Shifts #(
     end
   endgenerate
   
+  /*
   always @(posedge clk)
   begin
     if (data_valid)
@@ -149,7 +150,7 @@ module W0RM_ALU_Shifts #(
     data_valid_r1   <= data_valid;
     result_valid_r  <= data_valid_r1;
     result_r        <= result_i[SHIFT_SIZE];
-  end
+  end // */
   
   genvar  shift_count;
   generate

@@ -160,6 +160,9 @@ module W0RM_TopLevel #(
   
   reg   [1:0]             mem_addr_src = 0,
                           mem_data_src = 0;
+  reg   [DATA_WIDTH-1:0]  mem_rd_data = 0,
+                          mem_rn_data = 0,
+                          mem_literal = 0;
   
   wire  [DATA_WIDTH-1:0]  reg_pc;
   wire  [INST_WIDTH-1:0]  mem_inst_data;
@@ -215,16 +218,16 @@ module W0RM_TopLevel #(
   begin
     case (mem_data_src)
       MEM_DATA_SRC_RN:
-        mem_data = alu_rn_data;
+        mem_data = mem_rn_data;
       
       MEM_DATA_SRC_RD:
-        mem_data = alu_rd_data;
+        mem_data = mem_rd_data;
       
       MEM_DATA_SRC_ALU:
         mem_data = alu_result;
       
       MEM_DATA_SRC_LIT:
-        mem_data = alu_literal;
+        mem_data = mem_literal;
       default:
         mem_data = {DATA_WIDTH{1'b0}};
     endcase
@@ -237,13 +240,13 @@ module W0RM_TopLevel #(
         mem_addr = alu_result;
       
       MEM_ADDR_SRC_RN:
-        mem_addr = alu_rn_data;
+        mem_addr = mem_rn_data;
       
       MEM_ADDR_SRC_RD:
-        mem_addr = alu_rd_data;
+        mem_addr = mem_rd_data;
       
       MEM_ADDR_SRC_LIT:
-        mem_addr = alu_literal;
+        mem_addr = mem_literal;
       default:
         mem_addr = {ADDR_WIDTH{1'b0}};
     endcase
@@ -641,6 +644,9 @@ decode_reg_write_addr // 4
       mem_data_src  = alu_memory_data_src;
       //memory_addr   = alu_memory_addr;
       //memory_data   = alu_memory_data;
+      mem_rd_data   = alu_rd_data;
+      mem_rn_data   = alu_rn_data;
+      mem_literal   = alu_literal;
       mem_user_data_in = {
         alu_result,
         branch_result,
@@ -659,6 +665,9 @@ decode_reg_write_addr // 4
       mem_data_src  = branch_memory_data_src;
       //memory_addr   = branch_mem_addr;
       //memory_data   = branch_mem_data;
+      mem_rd_data   = branch_rd_data;
+      mem_rn_data   = branch_rn_data;
+      mem_literal   = branch_literal;
       mem_user_data_in = {
         32'd0,
         branch_result,
@@ -686,9 +695,9 @@ decode_reg_write_addr // 4
     .mem_output_valid(rstore_mem_result_valid),
     .mem_data_out(rstore_mem_result),
     
-    .mem_write(alu_memory_write),
-    .mem_read(alu_memory_read),
-    .mem_is_pop(alu_memory_is_pop),
+    .mem_write(memory_write),
+    .mem_read(memory_read),
+    .mem_is_pop(memory_is_pop),
     .mem_addr(mem_addr),
     .mem_data(mem_data),
     .mem_valid_i(alu_result_valid || branch_valid),

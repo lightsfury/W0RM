@@ -138,7 +138,7 @@ module W0RM_Example_Design(
     .BASE_ADDR(32'h80000080)
   ) gpio_a (
     .mem_clk(core_clk),
-    .cpu_reset(cpu_reset),
+    .cpu_reset(reset_i),
     
     .mem_valid_i(mem_valid_o),
     .mem_read_i(mem_read_o),
