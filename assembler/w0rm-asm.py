@@ -50,7 +50,7 @@ def resolve_label(label, cur_addr, labels):
     
     dist = r['addr'] - (cur_addr + 2)
     
-    print("resolve_label (%s) r['addr']=%x, cur_addr=%x dist=%d\n" % (label, int(r['addr']), cur_addr, dist))
+    #print("resolve_label (%s) r['addr']=%x, cur_addr=%x dist=%d\n" % (label, int(r['addr']), cur_addr, dist))
     
     return dist
   else:
@@ -125,7 +125,7 @@ def encode_load_store(s, cur_addr, labels):
   rn = int(params[1][2:])
   lit = int(params[2][1:-1])
   
-  print("load/store: rd=%d rn=%d lit=%d" % (rd, rn, lit))
+  #print("load/store: rd=%d rn=%d lit=%d" % (rd, rn, lit))
   
   return base + (rd * 0x0100) + (rn * 0x0010) + lit
 
