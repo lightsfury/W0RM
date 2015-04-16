@@ -444,29 +444,29 @@
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="202"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="202"/>
     </file>
-    <file xil_pn:name="src/W0RM_Synchro.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="src/peripheral/W0RM_Synchro.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="208"/>
     </file>
-    <file xil_pn:name="testbench/W0RM_Sync_base_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/peripheral/sync/W0RM_Sync_base_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="209"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="209"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="209"/>
     </file>
-    <file xil_pn:name="testbench/W0RM_Sync_1_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/peripheral/sync/W0RM_Sync_1_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="211"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="211"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="211"/>
     </file>
-    <file xil_pn:name="testbench/W0RM_Sync_ALU_base_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/peripheral/sync/W0RM_Sync_ALU_base_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="216"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="216"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="216"/>
     </file>
-    <file xil_pn:name="testbench/W0RM_Sync_ALU_1_tb.v" xil_pn:type="FILE_VERILOG">
+    <file xil_pn:name="testbench/peripheral/sync/W0RM_Sync_ALU_1_tb.v" xil_pn:type="FILE_VERILOG">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="218"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="218"/>
