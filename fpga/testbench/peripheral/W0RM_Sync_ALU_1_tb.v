@@ -6,8 +6,8 @@ module W0RM_Sync_ALU_1_tb(
 );
   W0RM_Sync_ALU_base_tb #(
     .DATA_WIDTH(8),
-    .FILE_SOURCE("../testbench/data/W0RM_Sync_ALU_1_tb_data.txt"),
-    .FILE_COMPARE("../testbench/data/W0RM_Sync_ALU_1_tb_compare.txt")
+    .FILE_SOURCE("../testbench/data/peripheral/sync/W0RM_Sync_ALU_1_tb_data.txt"),
+    .FILE_COMPARE("../testbench/data/peripheral/sync/W0RM_Sync_ALU_1_tb_compare.txt")
   ) dut (
     .done(done),
     .error(error)
