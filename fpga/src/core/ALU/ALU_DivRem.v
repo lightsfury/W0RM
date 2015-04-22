@@ -78,7 +78,7 @@ module W0RM_ALU_DivRem #(
   
   W0RM_Static_Timer #(
     .LOAD(0),
-    .LIMIT(46)
+    .LIMIT(47)
   ) valid_delay (
     .clk(clk),
     

@@ -41,7 +41,7 @@ module W0RM_Core_Memory #(
   reg   [ADDR_WIDTH-1:0]  mem_addr_r          = 0;
   reg                     mem_valid_r         = 0;
   reg   [DATA_WIDTH-1:0]  mem_result_r        = 0;
-  reg                     mem_ready_r         = 0;
+  //reg                     mem_ready_r         = 0;
 
   always @(posedge clk)
   begin
@@ -64,6 +64,13 @@ module W0RM_Core_Memory #(
         end
         else
         begin
+          pending_op    <= 1'b0;
+          mem_write_r   <= 1'b0;
+          mem_read_r    <= 1'b0;
+          mem_is_pop_r  <= 1'b0;
+          mem_data_r    <= 0;
+          mem_addr_r    <= 0;
+          mem_valid_r   <= 1'b0;
           // Not a real event, just pass it through
           user_data_r         <= user_data_in;
           mem_output_valid_r  <= 1'b1;
@@ -105,15 +112,15 @@ module W0RM_Core_Memory #(
     end
   end
   
-  assign #0.1 data_bus_write_out  = mem_write_r;
-  assign #0.1 data_bus_read_out   = mem_read_r;
-  assign #0.1 data_bus_valid_out  = mem_valid_r;
-  assign #0.1 data_bus_addr_out   = mem_addr_r;
-  assign #0.1 data_bus_data_out   = mem_data_r;
+  assign data_bus_write_out  = mem_write_r;
+  assign data_bus_read_out   = mem_read_r;
+  assign data_bus_valid_out  = mem_valid_r;
+  assign data_bus_addr_out   = mem_addr_r;
+  assign data_bus_data_out   = mem_data_r;
   
-  assign #0.1 mem_data_out        = mem_result_r;
-  assign #0.1 mem_ready           = ~pending_op;
-  assign #0.1 mem_output_valid    = mem_output_valid_r;
+  assign mem_data_out        = mem_result_r;
+  assign mem_ready           = ~pending_op;
+  assign mem_output_valid    = mem_output_valid_r;
   
-  assign #0.1 user_data_out       = user_data_r;
+  assign user_data_out       = user_data_r;
 endmodule

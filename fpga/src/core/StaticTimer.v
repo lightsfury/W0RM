@@ -34,7 +34,7 @@ module W0RM_Static_Timer #(
   begin
     if (go)
     begin
-      if (timer + 1 >= LIMIT)
+      if (timer == LIMIT)
       begin
         timer   <= 0;
         go      <= 0;

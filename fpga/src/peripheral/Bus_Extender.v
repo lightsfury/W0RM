@@ -19,7 +19,7 @@ module W0RM_Peripheral_Bus_Extender #(
   reg   [DATA_WIDTH-1:0]  bus_data_o_r = 0;
   reg                     bus_valid_o_r = 0;
   
-  always @(*)
+  always @(bus_port0_valid_i, bus_port1_valid_i, bus_port0_data_i, bus_port1_data_i)
   begin
     bus_valid_o_r = bus_port0_valid_i || bus_port1_valid_i;
     bus_data_o_r  = (bus_port0_valid_i) ? bus_port0_data_i : bus_port1_data_i;

@@ -61,7 +61,7 @@ module W0RM_ALU_Multiply #(
   
   W0RM_Static_Timer #(
     .LOAD(0),
-    .LIMIT(13)
+    .LIMIT(14)
   ) valid_delay (
     .clk(clk),
     

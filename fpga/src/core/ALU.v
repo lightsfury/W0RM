@@ -54,10 +54,10 @@ module W0RM_Core_ALU #(
   
   reg   [3:0]             opcode_r = 0;
   reg   [DATA_WIDTH-1:0]  data_a_r = 0,
-                          data_b_r = 0,
-                          result_r = 0;
-  reg                     data_valid_r = 0,
-                          result_valid_r = 0;
+                          data_b_r = 0;
+  //reg   [DATA_WIDTH-1:0]  result_r = 0;
+  reg                     data_valid_r = 0;
+  //reg                     result_valid_r = 0;
   reg   [3:0]             result_flags_r = 0,
                           store_flags_mask_r = 0;
   
@@ -97,16 +97,16 @@ module W0RM_Core_ALU #(
   reg                     long_opcode = 0;
   reg                     ext_bit_size_r = 0;
   
-  assign #0.1 result          = result_i;
-  assign #0.1 result_forward  = result_i;
-  assign #0.1 result_valid    = result_valid_i && data_valid_r;
-  assign #0.1 flag_zero       = result_flags_r[ALU_FLAG_ZERO];
-  assign #0.1 flag_negative   = result_flags_r[ALU_FLAG_NEG];
-  assign #0.1 flag_overflow   = result_flags_r[ALU_FLAG_OVER];
-  assign #0.1 flag_carry      = result_flags_r[ALU_FLAG_CARRY];
+  assign result          = result_i;
+  assign result_forward  = result_i;
+  assign result_valid    = result_valid_i && data_valid_r;
+  assign flag_zero       = result_flags_r[ALU_FLAG_ZERO];
+  assign flag_negative   = result_flags_r[ALU_FLAG_NEG];
+  assign flag_overflow   = result_flags_r[ALU_FLAG_OVER];
+  assign flag_carry      = result_flags_r[ALU_FLAG_CARRY];
   assign alu_ready            = mem_ready && (~data_valid_r || result_valid_i);
-  assign #0.1 user_data_out   = user_data_r;
-  assign #0.1 result_flags_forward = result_flags_temp;
+  assign user_data_out   = user_data_r;
+  assign result_flags_forward = result_flags_temp;
   
   always @(posedge clk)
   begin
@@ -136,8 +136,8 @@ module W0RM_Core_ALU #(
         // Register its data
         //user_data_r     <= user_data_in;
         data_valid_r    <= data_valid;
-        result_r        <= result_i;
-        result_valid_r  <= result_valid_i;
+        //result_r        <= result_i;
+        //result_valid_r  <= result_valid_i;
         result_flags_r  <= result_flags_temp;
         if (!data_valid)
         begin
@@ -147,7 +147,13 @@ module W0RM_Core_ALU #(
     end
   end
   
-  always @(*)
+  always @(data_valid_r, opcode_r, result_logic, result_valid_logic,
+           result_flags_logic, result_mul, result_valid_mul, result_flags_mul,
+           result_div_rem, result_valid_div_rem, result_flags_div_rem,
+           result_ext, result_valid_ext, result_flags_ext,
+           result_shifts, result_valid_shifts, result_flags_shifts,
+           result_add_sub, result_valid_add_sub, result_flags_add_sub,
+           result_add_sub, result_valid_add_sub, result_flags_add_sub)
   begin
     if (data_valid_r)
     begin
@@ -164,7 +170,7 @@ module W0RM_Core_ALU #(
           result_i        = result_logic;
           result_valid_i  = result_valid_logic;
           result_flags_i  = result_flags_logic;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_OR:
@@ -179,7 +185,7 @@ module W0RM_Core_ALU #(
           result_i        = result_logic;
           result_valid_i  = result_valid_logic;
           result_flags_i  = result_flags_logic;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_XOR:
@@ -194,7 +200,7 @@ module W0RM_Core_ALU #(
           result_i        = result_logic;
           result_valid_i  = result_valid_logic;
           result_flags_i  = result_flags_logic;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_NOT:
@@ -209,7 +215,7 @@ module W0RM_Core_ALU #(
           result_i        = result_logic;
           result_valid_i  = result_valid_logic;
           result_flags_i  = result_flags_logic;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_NEG:
@@ -224,7 +230,7 @@ module W0RM_Core_ALU #(
           result_i        = result_logic;
           result_valid_i  = result_valid_logic;
           result_flags_i  = result_flags_logic;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_MUL:
@@ -284,7 +290,7 @@ module W0RM_Core_ALU #(
           result_i        = result_add_sub;
           result_valid_i  = result_valid_add_sub;
           result_flags_i  = result_flags_add_sub;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_SUB:
@@ -299,7 +305,7 @@ module W0RM_Core_ALU #(
           result_i        = result_add_sub;
           result_valid_i  = result_valid_add_sub;
           result_flags_i  = result_flags_add_sub;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_SEX:
@@ -314,7 +320,7 @@ module W0RM_Core_ALU #(
           result_i        = result_ext;
           result_valid_i  = result_valid_ext;
           result_flags_i  = result_flags_ext;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_ZEX:
@@ -329,7 +335,7 @@ module W0RM_Core_ALU #(
           result_i        = result_ext;
           result_valid_i  = result_valid_ext;
           result_flags_i  = result_flags_ext;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_LSR:
@@ -344,7 +350,7 @@ module W0RM_Core_ALU #(
           result_i        = result_shifts;
           result_valid_i  = result_valid_shifts;
           result_flags_i  = result_flags_shifts;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_LSL:
@@ -359,7 +365,7 @@ module W0RM_Core_ALU #(
           result_i        = result_shifts;
           result_valid_i  = result_valid_shifts;
           result_flags_i  = result_flags_shifts;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_ASR:
@@ -374,7 +380,7 @@ module W0RM_Core_ALU #(
           result_i        = result_shifts;
           result_valid_i  = result_valid_shifts;
           result_flags_i  = result_flags_shifts;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         ALU_OPCODE_MOV:
@@ -389,7 +395,7 @@ module W0RM_Core_ALU #(
           result_i        = data_b_r;
           result_valid_i  = data_valid_r;
           result_flags_i  = 0;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = (SINGLE_CYCLE) ? 1'b0 : 1'b1;
         end
         
         default:
@@ -404,7 +410,7 @@ module W0RM_Core_ALU #(
           result_i        = 0;
           result_valid_i  = 0;
           result_flags_i  = 0;
-          long_opcode     = ~SINGLE_CYCLE;
+          long_opcode     = 0;
         end
       endcase
     end
@@ -424,7 +430,7 @@ module W0RM_Core_ALU #(
     end
   end
   
-  always @(*)
+  always @(store_flags_mask_r, result_flags_i, result_flags_r)
   begin
     if (store_flags_mask_r[0])
     begin

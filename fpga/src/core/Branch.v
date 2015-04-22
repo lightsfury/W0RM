@@ -59,7 +59,7 @@ module W0RM_Core_Branch #(
   reg                     branch_valid_r = 0;
   reg   [ADDR_WIDTH-1:0]  next_pc_r = 0;
   reg                     next_pc_valid_r = 0;
-  reg                     next_link_reg_r = 0;
+  reg   [DATA_WIDTH-1:0]  next_link_reg_r = 0;
   
   reg   [USER_WIDTH-1:0]  user_data_r = 0,
                           user_data_r2 = 0;
@@ -80,7 +80,7 @@ module W0RM_Core_Branch #(
   assign next_link_reg  = next_link_reg_r;
   assign user_data_out  = user_data_r2;
   
-  always @(*)
+  always @(is_branch_r, is_cond_branch_r, cond_branch_code_r)
   begin
     if (is_branch_r)
     begin
@@ -126,7 +126,7 @@ module W0RM_Core_Branch #(
     end
   end
   
-  always @(*)
+  always @(branch_taken, is_rel_abs_r, base_addr_r, lit_r, rn_r)
   begin
     if (branch_taken)
     begin
@@ -137,7 +137,7 @@ module W0RM_Core_Branch #(
       end
       else // Absolute address
       begin
-        next_pc_i = rn;
+        next_pc_i = rn_r;
       end
     end
     else
@@ -215,7 +215,6 @@ module W0RM_Core_Branch #(
           alu_flag_carry_r    <= 1'b0;
           alu_flag_overflow_r <= 1'b0;
           alu_flag_negative_r <= 1'b0;
-          
         end
       end
       

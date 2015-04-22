@@ -16,6 +16,7 @@ module W0RM_TopLevel #(
   output wire                   inst_valid_o,
   input wire  [INST_WIDTH-1:0]  inst_data_i,
   input wire                    inst_valid_i,
+  input wire  [ADDR_WIDTH-1:0]  inst_addr_i,
   
   // Data port
   output wire [ADDR_WIDTH-1:0]  mem_addr_o,
@@ -28,37 +29,39 @@ module W0RM_TopLevel #(
 );
   localparam NUM_REGS             = 16;
   
-  localparam REG_WRITE_SOURCE_ALU = 0;
-  localparam REG_WRITE_SOURCE_MEM = 1;
-  localparam REG_WRITE_SOURCE_B   = 2;
+  localparam REG_WRITE_SOURCE_ALU = 2'd0;
+  localparam REG_WRITE_SOURCE_MEM = 2'd1;
+  localparam REG_WRITE_SOURCE_B   = 2'd2;
   
-  localparam MEM_DATA_SRC_RN      = 0;
-  localparam MEM_DATA_SRC_RD      = 1;
-  localparam MEM_DATA_SRC_ALU     = 2;
-  localparam MEM_DATA_SRC_LIT     = 3;
+  localparam MEM_DATA_SRC_RN      = 2'd0;
+  localparam MEM_DATA_SRC_RD      = 2'd1;
+  localparam MEM_DATA_SRC_ALU     = 2'd2;
+  localparam MEM_DATA_SRC_LIT     = 2'd3;
   
-  localparam MEM_ADDR_SRC_RN      = 0;
-  localparam MEM_ADDR_SRC_RD      = 1;
-  localparam MEM_ADDR_SRC_ALU     = 2;
-  localparam MEM_ADDR_SRC_LIT     = 3;
+  localparam MEM_ADDR_SRC_RN      = 2'd0;
+  localparam MEM_ADDR_SRC_RD      = 2'd1;
+  localparam MEM_ADDR_SRC_ALU     = 2'd2;
+  localparam MEM_ADDR_SRC_LIT     = 2'd3;
   
-  localparam ALU_OP1_SOURCE_RD  = 0;
-  localparam ALU_OP1_SOURCE_RN  = 1;
-  localparam ALU_OP1_SOURCE_LIT = 2;
+  localparam ALU_OP1_SOURCE_RD    = 2'd0;
+  localparam ALU_OP1_SOURCE_RN    = 2'd1;
+  localparam ALU_OP1_SOURCE_LIT   = 2'd2;
   
-  localparam ALU_OP2_SOURCE_RD  = 0;
-  localparam ALU_OP2_SOURCE_RN  = 1;
-  localparam ALU_OP2_SOURCE_LIT = 2;
+  localparam ALU_OP2_SOURCE_RD    = 2'd0;
+  localparam ALU_OP2_SOURCE_RN    = 2'd1;
+  localparam ALU_OP2_SOURCE_LIT   = 2'd2;
   
-  localparam ALU_REG_FWD_NONE   = 0;
-  localparam ALU_REG_FWD_ALU    = 1;
-  localparam ALU_REG_FWD_MEM    = 2;
-  localparam ALU_REG_FWD_RSTORE = 3;
+  localparam ALU_REG_FWD_NONE     = 2'd0;
+  localparam ALU_REG_FWD_ALU      = 2'd1;
+  localparam ALU_REG_FWD_MEM      = 2'd2;
+  localparam ALU_REG_FWD_RSTORE   = 2'd3;
   
   wire                    decode_ready,
                           ifetch_ready,
                           fetch_ready,
-                          execute_ready;
+                          execute_ready,
+                          branch_ready,
+                          alu_ready;
   wire                    decode_valid;
   
   wire  [INST_WIDTH-1:0]  decode_inst,
@@ -85,7 +88,7 @@ module W0RM_TopLevel #(
   wire                    decode_memory_write,
                           decode_memory_read,
                           decode_memory_is_pop;
-  wire  [2:0]             decode_memory_data_src,
+  wire  [1:0]             decode_memory_data_src,
                           decode_memory_addr_src;
   wire  [1:0]             decode_rd_forward,
                           decode_rn_forward;
@@ -112,7 +115,7 @@ module W0RM_TopLevel #(
   wire                    rfetch_memory_write,
                           rfetch_memory_read,
                           rfetch_memory_is_pop;
-  wire  [2:0]             rfetch_memory_data_src,
+  wire  [1:0]             rfetch_memory_data_src,
                           rfetch_memory_addr_src;
   
   wire                    rfetch_reg_write;
@@ -129,7 +132,7 @@ module W0RM_TopLevel #(
   wire                    alu_memory_write,
                           alu_memory_read,
                           alu_memory_is_pop;
-  wire  [2:0]             alu_memory_data_src,
+  wire  [1:0]             alu_memory_data_src,
                           alu_memory_addr_src;
   
   wire                    alu_reg_write;
@@ -142,7 +145,7 @@ module W0RM_TopLevel #(
   wire                    branch_memory_write,
                           branch_memory_read,
                           branch_memory_is_pop;
-  wire  [2:0]             branch_memory_data_src,
+  wire  [1:0]             branch_memory_data_src,
                           branch_memory_addr_src;
   
   wire                    branch_reg_write;
@@ -164,8 +167,8 @@ module W0RM_TopLevel #(
                           mem_rn_data = 0,
                           mem_literal = 0;
   
-  wire  [DATA_WIDTH-1:0]  reg_pc;
-  wire  [INST_WIDTH-1:0]  mem_inst_data;
+  //wire  [DATA_WIDTH-1:0]  reg_pc;
+  //wire  [INST_WIDTH-1:0]  mem_inst_data;
   wire  [INST_WIDTH-1:0]  ifetch_inst_data;
   wire  [ADDR_WIDTH-1:0]  ifetch_inst_addr;
   
@@ -187,11 +190,15 @@ module W0RM_TopLevel #(
   reg   [ADDR_WIDTH-1:0]  mem_addr = 0;
   reg   [DATA_WIDTH-1:0]  mem_data = 0;
   reg   [DATA_WIDTH-1:0]  rstore_reg_write_data_r = 0;
+  wire                    alu_result_valid;
   
-  assign #0.1 alu_result_i = alu_result_r;
+  assign alu_result_i = alu_result_valid ? alu_result : alu_result_r;
   
+  //*
   always @(posedge core_clk)
-    alu_result_r <= alu_result;
+    if (alu_result_valid)
+      alu_result_r <= alu_result_forward;
+  // */
   
   always @(posedge core_clk)
     if (rstore_reg_write && rstore_mem_result_valid)
@@ -247,6 +254,7 @@ module W0RM_TopLevel #(
       
       MEM_ADDR_SRC_LIT:
         mem_addr = mem_literal;
+      
       default:
         mem_addr = {ADDR_WIDTH{1'b0}};
     endcase
@@ -259,7 +267,7 @@ module W0RM_TopLevel #(
         exec_rd_data  = rfetch_rd_data;
       
       ALU_REG_FWD_ALU:
-        exec_rd_data  = alu_result_forward;
+        exec_rd_data  = alu_result_i;
       
       ALU_REG_FWD_MEM:
         exec_rd_data  = rstore_reg_write_data;
@@ -267,13 +275,16 @@ module W0RM_TopLevel #(
       ALU_REG_FWD_RSTORE:
         exec_rd_data  = rstore_reg_write_data_r;
     endcase
-    
+  end
+  
+  always @(*)
+  begin
     case (rfetch_rn_forward)
       ALU_REG_FWD_NONE:
         exec_rn_data  = rfetch_rn_data;
       
       ALU_REG_FWD_ALU:
-        exec_rn_data  = alu_result_forward;
+        exec_rn_data  = alu_result_i;
       
       ALU_REG_FWD_MEM:
         exec_rn_data  = rstore_reg_write_data;
@@ -281,7 +292,10 @@ module W0RM_TopLevel #(
       ALU_REG_FWD_RSTORE:
         exec_rn_data  = rstore_reg_write_data_r;
     endcase
-    
+  end
+  
+  always @(*)
+  begin
     case (rfetch_alu_op1_select)
       ALU_OP1_SOURCE_RD:
         exec_alu_data_a = exec_rd_data;
@@ -295,7 +309,10 @@ module W0RM_TopLevel #(
       default:
         exec_alu_data_a = {DATA_WIDTH{1'b0}};
     endcase
-    
+  end
+  
+  always @(*)
+  begin
     case (rfetch_alu_op2_select)
       ALU_OP2_SOURCE_RD:
         exec_alu_data_b = exec_rd_data;
@@ -334,6 +351,7 @@ module W0RM_TopLevel #(
     // From Memory
     .inst_data_in(inst_data_i),
     .inst_valid_in(inst_valid_i),
+    .inst_addr_in(inst_addr_i),
     
     // To Decode
     .inst_data_out(ifetch_inst_data),
@@ -414,9 +432,9 @@ decode_branch_base_addr // 32
 decode_memory_write // 1
 decode_memory_read // 1
 decode_memory_is_pop // 1
-decode_memory_data_src // 3
-decode_memory_addr_src // 3
-// 9
+decode_memory_data_src // 2
+decode_memory_addr_src // 2
+// 7
     
 decode_reg_write // 1
 decode_reg_write_source // 2
@@ -424,10 +442,12 @@ decode_reg_write_addr // 4
 // 7
 // */
   
+  assign execute_ready  = alu_ready && branch_ready;
+  
   // Register file
   W0RM_Core_RegisterFile #(
     .SINGLE_CYCLE(SINGLE_CYCLE),
-    .USER_WIDTH(32 + 17 + 38 + 9 + 7 + 16)
+    .USER_WIDTH(32 + 17 + 38 + 7 + 7 + 16)
   ) regFile (
     .clk(core_clk),
     .reset(reset),
@@ -481,9 +501,9 @@ rfetch_literal // 32
 decode_memory_write // 1
 decode_memory_read // 1
 decode_memory_is_pop // 1
-decode_memory_data_src // 3
-decode_memory_addr_src // 3
-9
+decode_memory_data_src // 2
+decode_memory_addr_src // 2
+7
 
 decode_reg_write // 1
 decode_reg_write_source // 2
@@ -495,14 +515,14 @@ decode_reg_write_addr // 4
   W0RM_Core_ALU #(
     .SINGLE_CYCLE(SINGLE_CYCLE),
     .DATA_WIDTH(DATA_WIDTH),
-    .USER_WIDTH(96 + 9 + 7 + 16)
+    .USER_WIDTH(96 + 7 + 7 + 16)
   ) alu (
     .clk(core_clk),
     
     .flush(branch_flush_pipeline && branch_valid),
     
     .mem_ready(mem_ready),
-    .alu_ready(execute_ready),
+    .alu_ready(alu_ready),
     
     .opcode(rfetch_alu_opcode),
     .data_valid(rfetch_valid),
@@ -557,7 +577,7 @@ decode_reg_write_addr // 4
   // Branch unit
   W0RM_Core_Branch #(
     .SINGLE_CYCLE(SINGLE_CYCLE),
-    .USER_WIDTH(96 + 9 + 7 + 16)
+    .USER_WIDTH(96 + 7 + 7 + 16)
   ) branch (
     .clk(core_clk),
     
@@ -589,8 +609,8 @@ decode_reg_write_addr // 4
     .next_pc_valid(branch_next_pc_valid),
     
     .user_data_in({
-      rfetch_rd_data,
-      rfetch_rn_data,
+      exec_rd_data,
+      exec_rn_data,
       rfetch_literal,
       rfetch_memory_write,
       rfetch_memory_read,
@@ -630,12 +650,33 @@ decode_reg_write_addr // 4
   reg                             memory_write,
                                   memory_read,
                                   memory_is_pop;
-  reg   [ADDR_WIDTH-1:0]          memory_addr;
-  reg   [DATA_WIDTH-1:0]          memory_data;
+  //reg   [ADDR_WIDTH-1:0]          memory_addr;
+  //reg   [DATA_WIDTH-1:0]          memory_data;
   
   always @(*)
   begin
-    if (alu_result_valid)
+    if (branch_valid)
+    begin
+      memory_write  = branch_memory_write;
+      memory_read   = branch_memory_read;
+      memory_is_pop = branch_memory_is_pop;
+      mem_addr_src  = branch_memory_addr_src;
+      mem_data_src  = branch_memory_data_src;
+      //memory_addr   = branch_mem_addr;
+      //memory_data   = branch_mem_data;
+      mem_rd_data   = branch_rd_data;
+      //mem_rn_data   = branch_rn_data;
+      mem_literal   = branch_literal;
+      mem_user_data_in = {
+        alu_result,
+        branch_result,
+        branch_reg_write,
+        branch_reg_write_source,
+        branch_reg_write_addr,
+        branch_inst
+      };
+    end
+    else if (alu_result_valid)
     begin
       memory_write  = alu_memory_write;
       memory_read   = alu_memory_read;
@@ -645,7 +686,7 @@ decode_reg_write_addr // 4
       //memory_addr   = alu_memory_addr;
       //memory_data   = alu_memory_data;
       mem_rd_data   = alu_rd_data;
-      mem_rn_data   = alu_rn_data;
+      //mem_rn_data   = alu_rn_data;
       mem_literal   = alu_literal;
       mem_user_data_in = {
         alu_result,
@@ -656,29 +697,16 @@ decode_reg_write_addr // 4
         alu_inst
       };
     end
-    else if (branch_valid)
-    begin
-      memory_write  = branch_memory_write;
-      memory_read   = branch_memory_read;
-      memory_is_pop = branch_memory_is_pop;
-      mem_addr_src  = branch_memory_addr_src;
-      mem_data_src  = branch_memory_data_src;
-      //memory_addr   = branch_mem_addr;
-      //memory_data   = branch_mem_data;
-      mem_rd_data   = branch_rd_data;
-      mem_rn_data   = branch_rn_data;
-      mem_literal   = branch_literal;
-      mem_user_data_in = {
-        32'd0,
-        branch_result,
-        branch_reg_write,
-        branch_reg_write_source,
-        branch_reg_write_addr,
-        branch_inst
-      };
-    end
     else
     begin
+      memory_write  = 0;
+      memory_read   = 0;
+      memory_is_pop = 0;
+      mem_addr_src  = 0;
+      mem_data_src  = 0;
+      mem_rd_data   = 0;
+      mem_rn_data   = 0;
+      mem_literal   = 0;
       mem_user_data_in = {MEM_USER_DATA_SIZE{1'b0}};
     end
   end

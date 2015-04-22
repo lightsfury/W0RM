@@ -45,7 +45,7 @@ module W0RM_ALU_AddSub #(
   assign result = result_r;
   assign result_valid = result_valid_r;
   
-  always @(*)
+  always @(opcode, data_a, data_b)
   begin
     case (opcode)
       ALU_OPCODE_ADD:
@@ -66,7 +66,7 @@ module W0RM_ALU_AddSub #(
     if (SINGLE_CYCLE)
     begin
       
-      always @(*)
+      always @(result_i, data_valid, data_a, data_b, flag_carry_i)
       begin
         result_r        = result_i;
         result_valid_r  = data_valid;

@@ -43,7 +43,7 @@ module W0RM_Core_Decode #(
   output wire                   decode_memory_write,
                                 decode_memory_read,
                                 decode_memory_is_pop,
-  output wire [2:0]             decode_memory_data_src,
+  output wire [1:0]             decode_memory_data_src,
                                 decode_memory_addr_src,
   // RegStore stage
   output wire                   decode_reg_write,
@@ -166,19 +166,19 @@ module W0RM_Core_Decode #(
   localparam INST_Bucnd_LINK_YES  = 1;
   localparam INST_Bucnd_LINK_NO   = 0;
   
-  localparam REG_WRITE_SOURCE_ALU = 0;
-  localparam REG_WRITE_SOURCE_MEM = 1;
-  localparam REG_WRITE_SOURCE_B   = 2;
+  localparam REG_WRITE_SOURCE_ALU = 2'd0;
+  localparam REG_WRITE_SOURCE_MEM = 2'd1;
+  localparam REG_WRITE_SOURCE_B   = 2'd2;
   
-  localparam MEM_DATA_SRC_RN      = 0;
-  localparam MEM_DATA_SRC_RD      = 1;
-  localparam MEM_DATA_SRC_ALU     = 2;
-  localparam MEM_DATA_SRC_LIT     = 3;
+  localparam MEM_DATA_SRC_RN      = 2'd0;
+  localparam MEM_DATA_SRC_RD      = 2'd1;
+  localparam MEM_DATA_SRC_ALU     = 2'd2;
+  localparam MEM_DATA_SRC_LIT     = 2'd3;
   
-  localparam MEM_ADDR_SRC_RN      = 0;
-  localparam MEM_ADDR_SRC_RD      = 1;
-  localparam MEM_ADDR_SRC_ALU     = 2;
-  localparam MEM_ADDR_SRC_LIT     = 3;
+  localparam MEM_ADDR_SRC_RN      = 2'd0;
+  localparam MEM_ADDR_SRC_RD      = 2'd1;
+  localparam MEM_ADDR_SRC_ALU     = 2'd2;
+  localparam MEM_ADDR_SRC_LIT     = 2'd3;
   
   /*
   localparam MEM_WRITE_SOURCE_RN  = 0;
@@ -195,18 +195,18 @@ module W0RM_Core_Decode #(
   localparam MEM_ADDR_FWD_MEM     = 4;
   localparam MEM_ADDR_FWD_ALU     = 5; // */
   
-  localparam ALU_OP1_SOURCE_RD  = 0;
-  localparam ALU_OP1_SOURCE_RN  = 1;
-  localparam ALU_OP1_SOURCE_LIT = 2;
+  localparam ALU_OP1_SOURCE_RD  = 2'd0;
+  localparam ALU_OP1_SOURCE_RN  = 2'd1;
+  localparam ALU_OP1_SOURCE_LIT = 2'd2;
   
-  localparam ALU_OP2_SOURCE_RD  = 0;
-  localparam ALU_OP2_SOURCE_RN  = 1;
-  localparam ALU_OP2_SOURCE_LIT = 2;
+  localparam ALU_OP2_SOURCE_RD  = 2'd0;
+  localparam ALU_OP2_SOURCE_RN  = 2'd1;
+  localparam ALU_OP2_SOURCE_LIT = 2'd2;
   
-  localparam ALU_REG_FWD_NONE   = 0;
-  localparam ALU_REG_FWD_ALU    = 1;
-  localparam ALU_REG_FWD_MEM    = 2;
-  localparam ALU_REG_FWD_RSTORE = 3;
+  localparam ALU_REG_FWD_NONE   = 2'd0;
+  localparam ALU_REG_FWD_ALU    = 2'd1;
+  localparam ALU_REG_FWD_MEM    = 2'd2;
+  localparam ALU_REG_FWD_RSTORE = 2'd3;
   
   /*
   localparam ALU_OP2_SOURCE_RD  = 0;
@@ -258,7 +258,7 @@ module W0RM_Core_Decode #(
   reg   [2:0]             branch_code_r = 0;
   reg                     memory_write_r = 0,
                           memory_read_r = 0;
-  reg   [2:0]             memory_data_src_r = 0,
+  reg   [1:0]             memory_data_src_r = 0,
                           memory_addr_src_r = 0;
   reg                     memory_is_pop_r = 0;
   reg                     reg_write_r = 0;
@@ -277,8 +277,8 @@ module W0RM_Core_Decode #(
                           alu_op1_select_i = 0,
                           alu_op2_select_i = 0;
   reg                     alu_mem_read_r = 0,
-                          mem_mem_read_r = 0,
-                          rstore_mem_read_r = 0;
+                          mem_mem_read_r = 0;
+  //reg                      rstore_mem_read_r = 0;
   reg   [2:0]             mem_data_src_i = 0,
                           mem_addr_src_i = 0;
   reg   [1:0]             rd_fwd_r = 0,
@@ -317,13 +317,13 @@ module W0RM_Core_Decode #(
       
       alu_mem_read_r      <= memory_read_r && ~stall;
       mem_mem_read_r      <= alu_mem_read_r;
-      rstore_mem_read_r   <= mem_mem_read_r;
+      //rstore_mem_read_r   <= mem_mem_read_r;
     end
   end
   
   assign decode_ready = fetch_ready && ~stall;
   
-  always @(*)
+  always @(inst_valid_r, fetch_ready, instruction_r)
   begin
     if (inst_valid_r && fetch_ready)
     begin
@@ -669,9 +669,40 @@ module W0RM_Core_Decode #(
         end
       endcase
     end
+    else
+    begin
+          rd_addr_r           = 0;
+          rn_addr_r           = 0;
+          literal_r           = 0;
+          
+          alu_op1_select_i    = 0;
+          alu_op2_select_i    = 0;
+          alu_ext_8_16_r      = 0;
+          alu_opcode_r        = 0;
+          alu_store_flags_r   = 0;
+          
+          is_branch_r         = 0;
+          is_cond_branch_r    = 0;
+          branch_code_r       = 0;
+          branch_rel_abs_r    = 0;
+          
+          memory_write_r      = 0;
+          memory_read_r       = 0;
+          memory_data_src_r  = 0;
+          memory_addr_src_r   = 0;
+          memory_is_pop_r     = 0;
+          
+          reg_write_r         = 0;
+          reg_write_source_r  = 0;
+          reg_write_addr_r    = 0;
+          
+          bad_inst            = 0;
+    end
   end
   
-  always @(*)
+  always @(alu_reg_write_r, mem_reg_write_r, rstore_reg_write_r,
+           rstore_reg_addr_r, mem_reg_addr_r, alu_reg_addr_r,
+           rd_addr_r, rn_addr_r, mem_mem_read_r, alu_mem_read_r)
   begin
     if (alu_reg_write_r || mem_reg_write_r || rstore_reg_write_r)
     begin
@@ -723,37 +754,37 @@ module W0RM_Core_Decode #(
     end
   end
   
-  assign #0.1 control_valid           = inst_valid_r && ~bad_inst && ~stall;
+  assign control_valid           = inst_valid_r && ~bad_inst && ~stall;
   
-  assign #0.1 decode_rd_addr          = rd_addr_r;
-  assign #0.1 decode_rn_addr          = rn_addr_r;
-  assign #0.1 decode_literal          = literal_r;
+  assign decode_rd_addr          = rd_addr_r;
+  assign decode_rn_addr          = rn_addr_r;
+  assign decode_literal          = literal_r;
   
-  assign #0.1 decode_rd_forward       = rd_fwd_r;
-  assign #0.1 decode_rn_forward       = rn_fwd_r;
+  assign decode_rd_forward       = rd_fwd_r;
+  assign decode_rn_forward       = rn_fwd_r;
   
-  assign #0.1 decode_alu_op1_select   = alu_op1_select_i;
-  assign #0.1 decode_alu_op2_select   = alu_op2_select_i;
-  assign #0.1 decode_alu_ext_8_16     = alu_ext_8_16_r;
-  assign #0.1 decode_alu_opcode       = alu_opcode_r;
-  assign #0.1 decode_alu_store_flags  = alu_store_flags_r;
+  assign decode_alu_op1_select   = alu_op1_select_i;
+  assign decode_alu_op2_select   = alu_op2_select_i;
+  assign decode_alu_ext_8_16     = alu_ext_8_16_r;
+  assign decode_alu_opcode       = alu_opcode_r;
+  assign decode_alu_store_flags  = alu_store_flags_r;
   
-  assign #0.1 decode_is_branch        = is_branch_r;
-  assign #0.1 decode_is_cond_branch   = is_cond_branch_r;
-  assign #0.1 decode_branch_rel_abs   = branch_rel_abs_r;
-  assign #0.1 decode_branch_code      = branch_code_r;
-  assign #0.1 decode_branch_base_addr = inst_addr_r;
+  assign decode_is_branch        = is_branch_r;
+  assign decode_is_cond_branch   = is_cond_branch_r;
+  assign decode_branch_rel_abs   = branch_rel_abs_r;
+  assign decode_branch_code      = branch_code_r;
+  assign decode_branch_base_addr = inst_addr_r;
   
-  assign #0.1 decode_memory_write     = memory_write_r;
-  assign #0.1 decode_memory_read      = memory_read_r;
-  assign #0.1 decode_memory_is_pop    = memory_is_pop_r;
-  assign #0.1 decode_memory_data_src  = memory_data_src_r;
-  assign #0.1 decode_memory_addr_src  = memory_addr_src_r;
+  assign decode_memory_write     = memory_write_r;
+  assign decode_memory_read      = memory_read_r;
+  assign decode_memory_is_pop    = memory_is_pop_r;
+  assign decode_memory_data_src  = memory_data_src_r;
+  assign decode_memory_addr_src  = memory_addr_src_r;
   
-  assign #0.1 decode_reg_write        = reg_write_r;
-  assign #0.1 decode_reg_write_source = reg_write_source_r;
-  assign #0.1 decode_reg_write_addr   = reg_write_addr_r;
-  assign #0.1 decode_inst             = instruction_r;
+  assign decode_reg_write        = reg_write_r;
+  assign decode_reg_write_source = reg_write_source_r;
+  assign decode_reg_write_addr   = reg_write_addr_r;
+  assign decode_inst             = instruction_r;
   
-  //assign #0.1 decode_ready = decode_ready_r;
+  //assign decode_ready = decode_ready_r;
 endmodule

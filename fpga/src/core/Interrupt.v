@@ -131,13 +131,13 @@ module W0RM_Core_Interrupt #(
     end
   end
   
-  assign #0.1 r0_out = r0_r;
-  assign #0.1 r1_out = r1_r;
-  assign #0.1 r2_out = r2_r;
-  assign #0.1 r3_out = r3_r;
-  assign #0.1 pc_out = pc_r;
+  assign r0_out = r0_r;
+  assign r1_out = r1_r;
+  assign r2_out = r2_r;
+  assign r3_out = r3_r;
+  assign pc_out = pc_r;
   
-  assign #0.1 isr_addr_valid  = in_isr_r && in_isr_r2;
-  assign #0.1 isr_addr        = isr_vector[isr_vector_addr_r];
-  assign #0.1 isr_restore     = isr_restore_r;
+  assign isr_addr_valid  = in_isr_r && in_isr_r2;
+  assign isr_addr        = isr_vector[isr_vector_addr_r];
+  assign isr_restore     = isr_restore_r;
 endmodule

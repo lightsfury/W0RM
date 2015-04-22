@@ -29,11 +29,12 @@ module W0RM_Peripheral_GPIO #(
   localparam  DECODE_IDR  = 8;
   localparam  DECODE_ODR  = 12;
   
-  reg   [DATA_WIDTH-1:0]  idr   = 0,
-                          odr   = 0,
+  reg   [DATA_WIDTH-1:0]  odr   = 0,
                           ctrl  = 0,
                           en    = 0;
-  reg   [GPIO_WIDTH-1:0]  pin_gpio_pad_r = 0;
+  reg   [GPIO_WIDTH-1:0]  idr   = 0;
+  //reg   [GPIO_WIDTH-1:0]  pin_gpio_pad_r = 0;
+  wire  [GPIO_WIDTH-1:0]  pin_gpio_pad_i;
   reg                     mem_valid_o_r = 0;
   reg   [DATA_WIDTH-1:0]  mem_data_o_r = 0;
   wire                    mem_decode_ce;
@@ -64,7 +65,7 @@ module W0RM_Peripheral_GPIO #(
             mem_data_o_r  <= ctrl;
           
           DECODE_IDR:
-            mem_data_o_r  <= idr;
+            mem_data_o_r  <= {{(DATA_WIDTH-GPIO_WIDTH){1'b0}}, idr};
           
           DECODE_ODR:
             mem_data_o_r  <= odr;
@@ -108,23 +109,25 @@ module W0RM_Peripheral_GPIO #(
       begin
         if (cpu_reset)
         begin
-          pin_gpio_pad_r[i] <= 1'b0;
           idr[i]            <= 1'b0;
         end
         else if (en[i])
         begin
-          if (ctrl[i] == PIN_OUTPUT)
+          if (ctrl[i] == PIN_INPUT)
           begin
-            pin_gpio_pad_r[i] <= odr[i];
-          end
-          else if (ctrl[i] == PIN_INPUT)
-          begin
-            idr[i] <= pin_gpio_pad[i];
+            idr[i] <= pin_gpio_pad_i[i];
           end
         end
       end
       
-      assign pin_gpio_pad[i] = (en[i] && ctrl[i] == PIN_OUTPUT) ? pin_gpio_pad_r[i] : 1'bz;
+      IOBUF gpio_tristate_driver(
+        .I(odr[i]), // Value to put on the line
+        .O(pin_gpio_pad_i[i]), // Value on the line
+        .T(~en[i] || (ctrl[i] == PIN_INPUT)), // Active low output enable
+        .IO(pin_gpio_pad[i]) // IO line
+      );
+      
+      //assign pin_gpio_pad[i] = (en[i] && ctrl[i] == PIN_OUTPUT) ? pin_gpio_pad_r[i] : 1'bz;
     end
   endgenerate
 endmodule

@@ -2,18 +2,20 @@
 
 module W0RM_Example_Design_tb;
   reg clk = 0;
-  reg reset = 1;
+  reg reset = 0;
   
   wire  [7:0] leds;
   
-  initial #11 reset = 0;
+  initial #11 reset = 1;
   
   always #2.5 clk <= ~clk;
 
   W0RM_Example_Design dut(
-    .sysclk(clk),
+    .sysclk_p(clk),
+    .sysclk_n(~clk),
     .cpu_reset(reset),
     
-    .leds(leds)
+    .leds(leds),
+    .led_north(led_north)
   );
 endmodule

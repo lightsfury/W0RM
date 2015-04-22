@@ -67,7 +67,8 @@ module W0RM_ALU_Shifts #(
   wire  [DATA_WIDTH-1:0]  add_sub_result;
   wire                    flag_carry;
   
-  reg [DATA_WIDTH-1:0]  result_i[SHIFT_SIZE:0];
+  reg   [DATA_WIDTH-1:0]  result_i[SHIFT_SIZE:0];
+  wire  [SHIFT_SIZE:0]    shift_bits = data_b_r[SHIFT_SIZE:0];
   
   integer i;
   initial
@@ -90,7 +91,7 @@ module W0RM_ALU_Shifts #(
   generate
     if (SINGLE_CYCLE)
     begin
-      always @(*)
+      always @(data_valid, opcode, data_a, data_b, data_valid_r1, result_i[SHIFT_SIZE])
       begin
         data_valid_r1 = data_valid;
         
@@ -112,7 +113,6 @@ module W0RM_ALU_Shifts #(
         data_valid_r1   = data_valid;
         result_valid_r  = data_valid_r1;
         result_r        = result_i[SHIFT_SIZE];
-        
       end
     end
     else
@@ -135,35 +135,18 @@ module W0RM_ALU_Shifts #(
     end
   endgenerate
   
-  /*
-  always @(posedge clk)
-  begin
-    if (data_valid)
-    begin
-      opcode_r      <= opcode;
-      data_a_r      <= data_a;
-      data_b_r      <= data_b;
-      
-      result_i[0]   <= data_a;
-    end
-    
-    data_valid_r1   <= data_valid;
-    result_valid_r  <= data_valid_r1;
-    result_r        <= result_i[SHIFT_SIZE];
-  end // */
-  
   genvar  shift_count;
   generate
     for (shift_count = 0; shift_count < SHIFT_SIZE; shift_count = shift_count + 1)
     begin : shifter
-      always @(*)
+      always @(data_b_r, result_i[shift_count], opcode_r)
       begin
         if (data_b_r[shift_count])
         begin
           case (opcode_r)
             ALU_OPCODE_LSL:
             begin
-              result_i[shift_count+1] = {(result_i[shift_count][DATA_WIDTH-pow2(shift_count):0]), 
+              result_i[shift_count+1] = {(result_i[shift_count][DATA_WIDTH-pow2(shift_count)-1:0]), 
                                          {(pow2(shift_count)){1'b0}}};
             end
             
@@ -175,9 +158,8 @@ module W0RM_ALU_Shifts #(
             
             ALU_OPCODE_ASR:
             begin
-              result_i[shift_count+1] = {{result_i[shift_count][MSB],
-                                         {{(pow2(shift_count+1) - 1){result_i[shift_count][MSB]}}}},
-                                         (result_i[shift_count][DATA_WIDTH-1:pow2(shift_count+1)-1])};
+              result_i[shift_count+1] = {{(pow2(shift_count+1)){result_i[shift_count][MSB]}},
+                                        result_i[shift_count][DATA_WIDTH-1:pow2(shift_count+1)-1]};
             end
             
             default:
@@ -193,4 +175,43 @@ module W0RM_ALU_Shifts #(
       end
     end
   endgenerate
+  
+  /*
+  generate
+    begin
+      always @(data_b_r, result_i[SHIFT_SIZE-1], opcode_r)
+      begin
+        if (data_b_r[SHIFT_SIZE-])
+        begin
+          case (opcode_r)
+            ALU_OPCODE_LSL:
+            begin
+              result_i[SHIFT_SIZE+1] = {DATA_WIDTH{1'b0}};
+            end
+            
+            ALU_OPCODE_LSR:
+            begin
+              result_i[SHIFT_SIZE+1] = {{pow2(SHIFT_SIZE){1'b0}},
+                                      (result_i[SHIFT_SIZE-1][DATA_WIDTH-1:pow2(SHIFT_SIZE)-1])};
+            end
+            
+            ALU_OPCODE_ASR:
+            begin
+              result_i[SHIFT_SIZE] = {result_i[SHIFT_SIZE-1][MSB],
+                                      {(pow2(SHIFT_SIZE+1)-1){result_i[SHIFT_SIZE-1][MSB]}}};
+            end
+            
+            default:
+            begin
+              result_i[SHIFT_SIZE] = result_i[SHIFT_SIZE-1];
+            end
+          endcase
+        end
+        else
+        begin
+          result_i[SHIFT_SIZE] = result_i[SHIFT_SIZE-1];
+        end
+      end
+    end
+  endgenerate // */
 endmodule

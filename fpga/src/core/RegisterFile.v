@@ -4,7 +4,7 @@ module W0RM_Core_RegisterFile #(
   parameter SINGLE_CYCLE  = 0,
   parameter DATA_WIDTH    = 32,
   parameter NUM_REGISTERS = 16,
-  parameter USER_WIDTH = 64
+  parameter USER_WIDTH    = 64
 )(
   clk,
   flush,
@@ -79,18 +79,23 @@ module W0RM_Core_RegisterFile #(
   assign reg_file_ready = alu_ready;
   
   // Register file
-  reg [DATA_WIDTH - 1:0]  registers [NUM_REGISTERS - 1:0];
+  reg   [DATA_WIDTH-1:0]  registers [NUM_REGISTERS - 1:0];
   
-  reg [DATA_WIDTH - 1:0]  port0_data_r = 0,
+  reg   [DATA_WIDTH-1:0]  port0_data_r = 0,
                           port1_data_r = 0;
+  reg   [REG_ADDR_BITS-1:0] port0_addr_r = 0,
+                            port1_addr_r = 0;
 
-  reg [USER_WIDTH-1:0] user_data_r = 0;
+  reg   [USER_WIDTH-1:0]  user_data_r = 0;
   reg                     rfetch_valid_r = 0;
                           
-  assign #0.1 port_read0_data  = port0_data_r;
-  assign #0.1 port_read1_data  = port1_data_r;
-  assign #0.1 user_data_out    = user_data_r;
-  assign #0.1 rfetch_valid     = rfetch_valid_r;
+  //assign port_read0_data  = port0_data_r;
+  //assign port_read1_data  = port1_data_r;
+  assign user_data_out    = user_data_r;
+  assign rfetch_valid     = rfetch_valid_r;
+  
+  assign port_read0_data  = registers[port0_addr_r];
+  assign port_read1_data  = registers[port1_addr_r];
   
   integer i;
   initial
@@ -118,6 +123,7 @@ module W0RM_Core_RegisterFile #(
     begin
       registers[port_write_addr] <= port_write_data;
       
+      /*
       // Write before read
       if (port_read0_addr == port_write_addr)
       begin
@@ -135,13 +141,13 @@ module W0RM_Core_RegisterFile #(
       else
       begin
         port1_data_r <= registers[port_read1_addr];
-      end
+      end // */
     end
     else
     begin
       // No write action
-      port0_data_r <= registers[port_read0_addr];
-      port1_data_r <= registers[port_read1_addr];
+      //port0_data_r <= registers[port_read0_addr];
+      //port1_data_r <= registers[port_read1_addr];
     end
     
     if (flush)
@@ -155,6 +161,8 @@ module W0RM_Core_RegisterFile #(
       begin
         user_data_r     <= user_data_in;
         rfetch_valid_r  <= 1'b1;
+        port0_addr_r    <= port_read0_addr;
+        port1_addr_r    <= port_read1_addr;
       end
       else
       begin

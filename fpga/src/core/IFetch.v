@@ -24,6 +24,7 @@ module W0RM_Core_IFetch #(
   
   input wire  [INST_WIDTH-1:0]  inst_data_in,
   input wire                    inst_valid_in,
+  input wire  [ADDR_WIDTH-1:0]  inst_addr_in,
   
   output wire [INST_WIDTH-1:0]  inst_data_out,
   output wire                   inst_valid_out,
@@ -36,85 +37,64 @@ module W0RM_Core_IFetch #(
       reg   [ADDR_WIDTH-1:0]  reg_pc_r = START_PC, inst_addr_r = 0;
       reg   [INST_WIDTH-1:0]  inst_data_r = 0;
       reg                     flush_next_inst_r = 0,
-                              flush_next_inst_r2 = 0;
+                              flush_next_inst_r2 = 0,
+                              flush_next_inst_r3 = 0;
+      reg                     inst_valid_r = 0;
+      reg   [ADDR_WIDTH-1:0]  last_inst_addr_r = START_PC;
       
-      assign #0.1 reg_pc         = reg_pc_r;
-      assign #0.1 inst_valid_out = inst_valid_in && ~(reset || flush_next_inst_r);
-      assign #0.1 inst_data_out  = inst_data_in;
-      assign #0.1 ifetch_ready   = decode_ready && ~reset;
-      assign #0.1 reg_pc_valid   = decode_ready && ~reset;
-      assign #0.1 inst_addr_out  = inst_addr_r;
+      assign flush_i          = flush_next_inst_r || flush_next_inst_r2 || flush_next_inst_r3;
+      assign reg_pc           = reg_pc_r;
+      assign inst_valid_out   = inst_valid_r && ~reset;
+      assign inst_data_out    = inst_data_r;
+      assign ifetch_ready     = decode_ready && ~reset;
+      assign reg_pc_valid     = decode_ready && ~reset && ~flush_i;
+      assign inst_addr_out    = inst_addr_r;
       
       always @(posedge clk)
       begin
         if (reset)
         begin
-          reg_pc_r <= START_PC;
+          reg_pc_r            <= START_PC;
+          inst_addr_r         <= START_PC;
+          last_inst_addr_r    <= START_PC;
+          inst_data_r         <= {DATA_WIDTH{1'b0}};
+          flush_next_inst_r   <= 1'b0;
+          flush_next_inst_r2  <= 1'b0;
+          flush_next_inst_r3  <= 1'b0;
         end
         else if (branch_data_valid && next_pc_valid)
         begin
           reg_pc_r          <= next_pc;
-          inst_addr_r       <= 0;
+          inst_addr_r       <= next_pc;
           flush_next_inst_r <= 1'b1;
-        end
-        else if (inst_valid_in)
-        begin
-          if (decode_ready)
-          begin
-            reg_pc_r            <= reg_pc_r + 2;
-            inst_addr_r         <= reg_pc_r;
-            inst_data_r         <= inst_data_in;
-            flush_next_inst_r   <= 1'b0;
-            flush_next_inst_r2  <= flush_next_inst_r;
-          end
-          else
-          begin
-            reg_pc_r          <= inst_addr_r;
-            inst_addr_r       <= inst_addr_r;
-            inst_data_r       <= inst_data_r;
-          end
-        end
-      end
-    
-    /*
-      
-      reg   [DATA_WIDTH-1:0]  reg_pc_r = START_PC;
-      reg                     reg_pc_valid_r = 0;
-      reg                     ifetch_ready_r = 0;
-      reg   [INST_WIDTH-1:0]  instruction_r = 0;
-      
-      assign reg_pc = reg_pc_r;
-      assign reg_pc_valid = reg_pc_valid_r;
-      assign #0.1 ifetch_ready = decode_ready;
-      
-      assign inst_data_out = inst_data_in;
-      
-      //assign inst_data_out = inst_data_in;
-      //assign inst_data_out = instruction_r;
-      assign inst_valid_out = inst_valid_in;
-      
-      always @(posedge clk)
-      begin
-        // Reset action
-        if (reset)
-        begin
-          reg_pc_r        <= START_PC;
-          reg_pc_valid_r  <= 1'b0;
-          ifetch_ready_r  <= 1'b0;
+          inst_valid_r      <= 1'b0;
         end
         else if (decode_ready)
         begin
-          reg_pc_r        <= reg_pc_r + 2;
-          reg_pc_valid_r  <= 1'b1;
-          ifetch_ready_r  <= 1'b1;
-          instruction_r   <= inst_data_in;
+          inst_valid_r        <= inst_valid_in && ~flush_i;
+          flush_next_inst_r   <= 1'b0;
+          flush_next_inst_r2  <= flush_next_inst_r;
+          flush_next_inst_r3  <= flush_next_inst_r2;
+          last_inst_addr_r    <= (inst_valid_in && ~flush_i) ? inst_addr_in : inst_addr_r;
+          
+          if (/* inst_valid_in && */~flush_i)
+          begin
+            reg_pc_r            <= reg_pc_r + 2;
+            inst_addr_r         <= inst_addr_in;
+            inst_data_r         <= inst_data_in;
+          end
+          else
+          begin
+            reg_pc_r          <= reg_pc_r;
+            inst_addr_r       <= inst_addr_in;
+            inst_data_r       <= inst_data_in;
+          end
         end
         else
         begin
-          reg_pc_valid_r  <= 1'b0;
-          ifetch_ready_r  <= 1'b1;
+          reg_pc_r            <= last_inst_addr_r + 2;
         end
-      end // */
+      end
     end
     else
     begin

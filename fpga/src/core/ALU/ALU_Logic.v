@@ -45,7 +45,7 @@ module W0RM_ALU_Logic #(
                                         (result_r[MSB] && (~data_a_r[MSB]) && (~data_b_r[MSB]));
   assign result_flags[ALU_FLAG_CARRY] = 1'b0; // Carry not defined for logic ops
   
-  always @(*)
+  always @(data_valid, opcode, data_a, data_b)
   begin
     result_valid_i = data_valid;
     
@@ -92,7 +92,7 @@ module W0RM_ALU_Logic #(
   generate
     if (SINGLE_CYCLE)
     begin
-      always @(*)
+      always @(data_a, data_b, result_i, result_valid_i)
       begin
         data_a_r        = data_a;
         data_b_r        = data_b;

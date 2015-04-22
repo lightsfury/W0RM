@@ -1,9 +1,12 @@
 `timescale 1ns/100ps
 
 module W0RM_Example_Design(
-  input wire        sysclk,
+  input wire        sysclk_p,
+                    sysclk_n,
   input wire        cpu_reset,
-  output wire [7:0] leds
+  inout wire  [7:0] leds,
+  output wire       led_north,
+                    led_east
 );
   localparam INST_WIDTH = 16;
   localparam DATA_WIDTH = 32;
@@ -12,7 +15,7 @@ module W0RM_Example_Design(
   wire  [DATA_WIDTH-1:0]  inst_data;
   wire  [ADDR_WIDTH-1:0]  inst_addr_o;
   reg   [ADDR_WIDTH-1:0]  inst_addr_r = 0;
-  reg                     inst_valid_i = 0;
+  //reg                     inst_valid_i = 0;
   
   wire  [ADDR_WIDTH-1:0]  mem_addr_o;
   wire  [DATA_WIDTH-1:0]  mem_data_o,
@@ -22,12 +25,28 @@ module W0RM_Example_Design(
   wire                    gpio_valid_i;
   wire  [DATA_WIDTH-1:0]  bus_data_i;
   wire                    bus_valid_i;
-  reg   [INST_WIDTH-1:0]  inst_data_r = 0;
+  //reg   [INST_WIDTH-1:0]  inst_data_r = 0;
+  wire                    sysclk;
+  
+  IBUFGDS sysclk_buffer(
+    .I(sysclk_p),
+    .IB(sysclk_n),
+    .O(sysclk)
+  );
+  
+  // Instantiate the module
+  W0RM_Example_PLL w0rm_example_pll (
+    .CLKIN1_IN(sysclk),
+    .RST_IN(1'b0),
+    .CLK0_OUT(core_clk),
+    .LOCKED_OUT(pll_locked)
+  );
 
+  /*
   IBUFG sysclk_bufg(
     .I(sysclk),
     .O(core_clk)
-  );
+  ); // */
   
   IBUF cpu_reset_input(
     .I(cpu_reset),
@@ -36,7 +55,7 @@ module W0RM_Example_Design(
   
   reg reset_r = 1;
   always @(posedge core_clk)
-    reset_r <= reset_i;
+    reset_r <= ~reset_i || ~pll_locked;
   
   W0RM_Example_Design_Instruction_ROM example_rom(
     .clka(core_clk),
@@ -48,11 +67,25 @@ module W0RM_Example_Design(
     .douta(inst_data)
   );
   
+  reg                     inst_valid_r1 = 0, 
+                          inst_valid_r2 = 0;
+  reg   [ADDR_WIDTH-1:0]  inst_addr_r1  = 0,
+                          inst_addr_r2  = 0;
+  reg   [INST_WIDTH-1:0]  inst_data_r   = 0;
+              
+  
   always @(posedge core_clk)
   begin
-    inst_valid_i  <= inst_valid_o;
-    inst_addr_r   <= inst_addr_o;
-    inst_data_r   <= inst_data_i;
+    inst_valid_r1 <= inst_valid_o;
+    inst_valid_r2 <= inst_valid_r1;
+    
+    inst_addr_r1  <= inst_addr_o;
+    inst_addr_r2  <= inst_addr_r1;
+    
+    if (inst_addr_r1[1])
+      inst_data_r <= inst_data[INST_WIDTH-1:0];
+    else
+      inst_data_r <= inst_data[DATA_WIDTH-1:(DATA_WIDTH-INST_WIDTH)];
   end
   
   /*
@@ -84,8 +117,9 @@ module W0RM_Example_Design(
     
     .inst_addr_o(inst_addr_o),
     .inst_valid_o(inst_valid_o),
-    .inst_data_i(inst_data_i),
-    .inst_valid_i(inst_valid_i),
+    .inst_data_i(inst_data_r),
+    .inst_valid_i(inst_valid_r2),
+    .inst_addr_i(inst_addr_r2),
     
     .mem_addr_o(mem_addr_o),
     .mem_data_o(mem_data_o),
@@ -138,7 +172,7 @@ module W0RM_Example_Design(
     .BASE_ADDR(32'h80000080)
   ) gpio_a (
     .mem_clk(core_clk),
-    .cpu_reset(reset_i),
+    .cpu_reset(reset_r),
     
     .mem_valid_i(mem_valid_o),
     .mem_read_i(mem_read_o),
@@ -151,5 +185,24 @@ module W0RM_Example_Design(
     
     .pin_gpio_pad(leds)
   );
-
+  
+  reg   [24:0]  counter = 0;
+  
+  always @(posedge core_clk)
+  begin
+    counter <= counter + 1;
+  end
+  
+  assign led_north = counter[24];
+  assign led_east  = counter[23];
+  
+  /*
+  W0RM_Static_Timer #(
+    .LOAD(0),
+    .LIMIT(3)
+  ) led_north_blink (
+    .clk(core_clk),
+    .start(pll_locked),
+    .stop(led_north)
+  ); // */
 endmodule

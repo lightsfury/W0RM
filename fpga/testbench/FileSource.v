@@ -14,9 +14,9 @@ module FileSource #(
   reg                   valid_r = 0;
   reg                   empty_r = 0;
   
-  assign #0.1 data   = data_r;
-  assign #0.1 valid  = valid_r;
-  assign #0.1 empty  = empty_r;
+  assign data   = data_r;
+  assign valid  = valid_r;
+  assign empty  = empty_r;
   
   integer fileHandle;
   integer status1;

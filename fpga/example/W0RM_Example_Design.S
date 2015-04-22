@@ -1,7 +1,7 @@
 ; Walnut Zero RISC Machine example design program
 ; This program uses a delay loop to toggle an LED
 
-; NOP
+NOP
 
 ; Setup the memory address
 ; Set R4 to value 0x80000080
@@ -120,7 +120,7 @@ MOV R1, #0x4
 ; NOP
 ; NOP
 ; NOP
-; LSL R1, #16
+LSL R1, #16
 ; NOP
 ; NOP
 ; NOP

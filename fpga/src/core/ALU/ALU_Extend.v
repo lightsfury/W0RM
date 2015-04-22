@@ -40,7 +40,7 @@ module W0RM_ALU_Extend #(
   assign result = result_r;
   assign result_valid = result_valid_r;
   
-  always @(*)
+  always @(data_valid, opcode, ext_8_16, data_a)
   begin
     result_valid_i = data_valid;
     if (data_valid)
@@ -89,7 +89,7 @@ module W0RM_ALU_Extend #(
   generate
     if (SINGLE_CYCLE)
     begin
-      always @(*)
+      always @(result_i, result_valid_i)
       begin
         result_r        = result_i;
         result_valid_r  = result_valid_i;
