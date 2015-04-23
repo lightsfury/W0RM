@@ -5,9 +5,10 @@ module W0RM_Peripheral_MemoryBlock #(
   parameter DATA_WIDTH  = 32,
   parameter MEM_DEPTH   = 512,
   parameter BASE_ADDR   = 32'h4000_0000,
-  parameter INIT_FILE   = ""
+  parameter INIT_FILE   = "",
+  parameter USER_WIDTH  = 32
 )(
-  input wire    mem_clk,
+  input wire                    mem_clk,
   
   // Port A
   input wire                    mem_a_valid_i,
@@ -16,7 +17,10 @@ module W0RM_Peripheral_MemoryBlock #(
   input wire  [ADDR_WIDTH-1:0]  mem_a_addr_i,
   input wire  [DATA_WIDTH-1:0]  mem_a_data_i,
   output wire                   mem_a_valid_o,
-  output wire [DATA_WIDTH-1:0]  mem_a_data_o
+  output wire [DATA_WIDTH-1:0]  mem_a_data_o,
+  
+  input wire  [USER_WIDTH-1:0]  mem_a_user_i,
+  output wire [USER_WIDTH-1:0]  mem_a_user_o
 );
   // log base 2 function
   function integer log2(input integer n);
@@ -46,6 +50,9 @@ module W0RM_Peripheral_MemoryBlock #(
   
   reg                         mem_a_valid_r = 0;
   reg   [MEM_HIGH-MEM_LOW:0]  mem_a_addr_r  = 0;
+  reg   [USER_WIDTH-1:0]      mem_a_user_r = 0;
+  
+  assign mem_a_user_o = mem_a_user_r;
   
   genvar i;
   generate
@@ -73,6 +80,7 @@ module W0RM_Peripheral_MemoryBlock #(
       begin
         mem_contents[mem_a_addr_int] <= mem_a_data_i;
       end
+      mem_a_user_r <= mem_a_user_i;
     end
     
     mem_a_valid_r <= mem_a_valid_i && mem_a_decode_ce && (mem_a_read_i || mem_a_write_i);
