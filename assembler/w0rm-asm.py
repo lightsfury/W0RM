@@ -4,6 +4,40 @@ import sys
 import re
 from functools import reduce
 
+def asm_output_coe(file, lines, start_address=0, output_width=32):
+  file.write('memory_initialization_radix=16;\nmemory_initialization_vector=\n')
+  
+  for i in range(0, len(lines), int(output_width / 16)):
+    for j in range (0, int(output_width / 16)):
+      if (i + j) < len(lines):
+        file.write('%0.4x' % lines[i + j])
+      else:
+        file.write('0000')
+    if (i + (output_width / 16)) >= len(lines):
+      file.write(';')
+    else:
+      file.write(",\n")
+
+def asm_output_hex(file, lines, start_address=0, output_width=32):
+  file.write('@ 0x%0x\n' % start_address)
+  for i in range(1, len(lines), int(output_width / 16)):
+    for j in range (0, int(output_width / 16)):
+      file.write('%0.4x' % lines[i + j])
+    file.write("\n")
+
+def asm_output_bin(file, lines, start_address=0, output_width=32):
+  file.write('@ 0x%0x\n' % start_address)
+  for i in range(1, len(lines), int(output_width / 16)):
+    for j in range (0, int(output_width / 16)):
+      file.write('%0.16b' % lines[i + j])
+    file.write("\n")
+
+asm_output_fuctions = {
+  'coe': asm_output_coe,
+  'hex': asm_output_hex,
+  'bin': asm_output_bin
+}
+
 alu_operand_to_opcode = {
   'AND': 0,
   'OR': 1,
@@ -293,11 +327,11 @@ def encode_assembly(lines, labels, start_address = 0):
     i += 2
     values.append(v)
     
-  encoded_values = ['%0.4x' % v for v in values]
+  #encoded_values = ['%0.4x' % v for v in values]
   
-  return encoded_values
+  return values
 
-def run_assembler(input_file, output_file, output_type = 'coe', output_width = 32):
+def run_assembler(input_file, output_file, output_type = 'coe', output_width = 32, start_address=0x20000000):
   with open(input_file) as f:
     lines = f.readlines()
   
@@ -310,9 +344,11 @@ def run_assembler(input_file, output_file, output_type = 'coe', output_width = 3
   #print(lines)
   lines = extract_mnemonic(lines)
   #print(lines)
-  lines = encode_assembly(lines, labels)
+  lines = encode_assembly(lines, labels, start_address=start_address)
   
   with open(output_file, 'w') as f:
+    asm_output_fuctions[output_type](f, lines, start_address=start_address, output_width=output_width)
+    '''
     if output_type == 'coe':
       f.write('memory_initialization_radix=16;\nmemory_initialization_vector=\n')
       include_comma = True
@@ -332,9 +368,28 @@ def run_assembler(input_file, output_file, output_type = 'coe', output_width = 3
         else:
           f.write("\n");
         bits = 0
+    '''
 
 if __name__=="__main__":
   import sys
+  import argparse
+  
+  def str_lower(*pargs, **kargs):
+    s = str(*pargs, **kargs)
+    return s.lower()
+  
+  parser = argparse.ArgumentParser(description = 'Generate byte code for the Walnut Zero Architecture', formatter_class=argparse.RawDescriptionHelpFormatter)
+  group = parser.add_argument_group('Output type', 'specify output file type')
+  group.add_argument('--output-type', '-t', metavar='<output-type>', type=str_lower, help = "specify output type\n  coe: Format for Xilinx Block Memory Generator IP Core\n  hex: hexadecimal output for use with $readmemh\n  bin: binary output for use with $readmemb", default='coe', choices=['coe', 'hex', 'bin'])
+  # Optional start address
+  parser.add_argument('--start_address', '-s', metavar='<start address>', type=lambda x: int(x, 0), help='base address to load memory at', default=0x2000000)
+  # Positional arguments
+  parser.add_argument('input_file', metavar='<input file>', type=str, help='input file path')
+  parser.add_argument('output_file', metavar='<output file>', type=str, help='output file path')
+  args = parser.parse_args()
+  
+  #print(args)
+  #print(args.input_type
   #print(sys.argv)
-  run_assembler(sys.argv[1], sys.argv[2])
+  run_assembler(args.input_file, args.output_file, output_type=args.output_type, start_address=args.start_address)
   
