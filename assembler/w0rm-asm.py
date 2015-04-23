@@ -22,14 +22,20 @@ def asm_output_hex(file, lines, start_address=0, output_width=32):
   file.write('@ 0x%0x\n' % start_address)
   for i in range(1, len(lines), int(output_width / 16)):
     for j in range (0, int(output_width / 16)):
-      file.write('%0.4x' % lines[i + j])
+      if (i + j) < len(lines):
+        file.write('%0.4x' % lines[i + j])
+      else:
+        file.write('0000')
     file.write("\n")
 
 def asm_output_bin(file, lines, start_address=0, output_width=32):
   file.write('@ 0x%0x\n' % start_address)
   for i in range(1, len(lines), int(output_width / 16)):
     for j in range (0, int(output_width / 16)):
-      file.write('%0.16b' % lines[i + j])
+      if (i + j) < len(lines):
+        file.write('%0.4x' % lines[i + j])
+      else:
+        file.write('0000')
     file.write("\n")
 
 asm_output_fuctions = {
@@ -382,7 +388,8 @@ if __name__=="__main__":
   group = parser.add_argument_group('Output type', 'specify output file type')
   group.add_argument('--output-type', '-t', metavar='<output-type>', type=str_lower, help = "specify output type\n  coe: Format for Xilinx Block Memory Generator IP Core\n  hex: hexadecimal output for use with $readmemh\n  bin: binary output for use with $readmemb", default='coe', choices=['coe', 'hex', 'bin'])
   # Optional start address
-  parser.add_argument('--start_address', '-s', metavar='<start address>', type=lambda x: int(x, 0), help='base address to load memory at', default=0x2000000)
+  parser.add_argument('--start-address', '-s', metavar='<start address>', type=lambda x: int(x, 0), help='base address to load memory at', default=0x2000000)
+  parser.add_argument('--data-width', '-w', metavar='<data_width>', type=lambda x: int(x, 0), help='Number of bits to encode at each address', default=32)
   # Positional arguments
   parser.add_argument('input_file', metavar='<input file>', type=str, help='input file path')
   parser.add_argument('output_file', metavar='<output file>', type=str, help='output file path')
@@ -391,5 +398,5 @@ if __name__=="__main__":
   #print(args)
   #print(args.input_type
   #print(sys.argv)
-  run_assembler(args.input_file, args.output_file, output_type=args.output_type, start_address=args.start_address)
+  run_assembler(args.input_file, args.output_file, output_type=args.output_type, start_address=args.start_address, output_width=args.data_width)
   
