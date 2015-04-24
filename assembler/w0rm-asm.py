@@ -19,7 +19,7 @@ def asm_output_coe(file, lines, start_address=0, output_width=32):
       file.write(",\n")
 
 def asm_output_hex(file, lines, start_address=0, output_width=32):
-  file.write('@ 0x%0x\n' % start_address)
+  #file.write('@ 0x%0x\n' % start_address)
   for i in range(1, len(lines), int(output_width / 16)):
     for j in range (0, int(output_width / 16)):
       if (i + j) < len(lines):
@@ -29,7 +29,7 @@ def asm_output_hex(file, lines, start_address=0, output_width=32):
     file.write("\n")
 
 def asm_output_bin(file, lines, start_address=0, output_width=32):
-  file.write('@ 0x%0x\n' % start_address)
+  #file.write('@ 0x%0x\n' % start_address)
   for i in range(1, len(lines), int(output_width / 16)):
     for j in range (0, int(output_width / 16)):
       if (i + j) < len(lines):
@@ -110,7 +110,7 @@ def encode_extend(s, cur_addr, labels):
   if s['operand'][4] == 'H':
     base += 0x0400
   
-  reg = int(s['params'][1:])
+  reg = int(s['params'][1:], 0)
   
   return base + (reg * 16)
 
@@ -121,7 +121,7 @@ def encode_cond_branch(s, cur_addr, labels):
   
   if 'X' in s['operand']:
     # Branch to register address
-    param = int(s['params'][1:])
+    param = int(s['params'][1:], 0)
     
     base += 0x1000
   else:
@@ -161,9 +161,9 @@ def encode_load_store(s, cur_addr, labels):
   
   params = s['params'].split(',')
   
-  rd = int(params[0][1:])
-  rn = int(params[1][2:])
-  lit = int(params[2][1:-1])
+  rd = int(params[0][1:], 0)
+  rn = int(params[1][2:], 0)
+  lit = int(params[2][1:-1], 0)
   
   #print("load/store: rd=%d rn=%d lit=%d" % (rd, rn, lit))
   
@@ -174,8 +174,8 @@ def encode_alu(s, cur_addr, labels):
   
   params = s['params'].split(',')
   
-  rd = int(params[0][1:])
-  rn = int(params[1][1:])
+  rd = int(params[0][1:], 0)
+  rn = int(params[1][1:], 0)
   
   base = 0x8000
   
@@ -189,8 +189,8 @@ def encode_shift(s, cur_addr, labels):
   
   params = s['params'].split(',')
   
-  rd = int(params[0][1:])
-  rn = int(params[1][1:])
+  rd = int(params[0][1:], 0)
+  rn = int(params[1][1:], 0)
   
   base = 0xA000
   
@@ -205,7 +205,7 @@ def encode_push_pop(s, cur_addr, labels):
   if s['operand'] == 'POP':
     base += 0x0100
   
-  rd = int(s['params'][1:])
+  rd = int(s['params'][1:], 0)
   
   return base + rd
 
@@ -216,7 +216,7 @@ def encode_branch(s, cur_addr, labels):
   
   if 'X' in s['operand']:
     # Branch to register address
-    param = int(s['params'][1:])
+    param = int(s['params'][1:], 0)
     
     base += 0x0800
   else:
@@ -306,7 +306,7 @@ def extract_mnemonic(lines):
   return p
 
 def extract_labels(lines, start_address = 0):
-  c = re.compile(r'^([A-Za-z_]+):$')
+  c = re.compile(r'^([A-Za-z0-9_]+):$')
   labels = []
   new_lines = []
   i = start_address
