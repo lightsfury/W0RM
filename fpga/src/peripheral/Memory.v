@@ -40,19 +40,22 @@ module W0RM_Peripheral_MemoryBlock #(
   
   localparam  MEM_ADDR_START  = BASE_ADDR;
   localparam  MEM_ADDR_STOP   = BASE_ADDR + MEM_DEPTH;
-  localparam  MEM_LOW         = log2(DATA_WIDTH);
+  localparam  MEM_LOW         = log2(DATA_WIDTH / 8);
   localparam  MEM_HIGH        = log2(MEM_DEPTH) + MEM_LOW;
+  localparam  MEM_ADDR_INT_W  = log2(MEM_DEPTH);
   
   reg [DATA_WIDTH-1:0]  mem_contents  [MEM_DEPTH:0];
   
   wire  mem_a_decode_ce = (mem_a_addr_i >= BASE_ADDR) && (mem_a_addr_i < MEM_ADDR_STOP);
-  wire  mem_a_addr_int  = mem_a_addr_i[MEM_HIGH:MEM_LOW];
+  wire  [MEM_ADDR_INT_W:0]  mem_a_addr_int  = mem_a_addr_i[MEM_HIGH:MEM_LOW];
   
-  reg                         mem_a_valid_r = 0;
-  reg   [MEM_HIGH-MEM_LOW:0]  mem_a_addr_r  = 0;
-  reg   [USER_WIDTH-1:0]      mem_a_user_r = 0;
+  reg                       mem_a_valid_r = 0;
+  reg   [MEM_ADDR_INT_W:0]  mem_a_addr_r  = 0;
+  reg   [USER_WIDTH-1:0]    mem_a_user_r  = 0;
   
-  assign mem_a_user_o = mem_a_user_r;
+  assign mem_a_user_o   = mem_a_user_r;
+  assign mem_a_valid_o  = mem_a_valid_r;
+  assign mem_a_data_o   = mem_contents[mem_a_addr_r];
   
   genvar i;
   generate
@@ -66,8 +69,16 @@ module W0RM_Peripheral_MemoryBlock #(
     end
     else
     begin
+      for (i = 0; i < MEM_DEPTH; i = i + 1)
+      begin: mem_contents_init
+        initial
+          mem_contents[i] = {DATA_WIDTH{1'b0}};
+      end
       initial
-        $readmemh(INIT_FILE, mem_contents, MEM_ADDR_START, MEM_ADDR_STOP);
+      begin
+        $display("Reading memory contents from '%s'.", INIT_FILE);
+        $readmemh(INIT_FILE, mem_contents);
+      end
     end
   endgenerate
   

@@ -21,8 +21,18 @@ module W0RM_Peripheral_Bus_Extender #(
   
   always @(bus_port0_valid_i, bus_port1_valid_i, bus_port0_data_i, bus_port1_data_i)
   begin
-    bus_valid_o_r = bus_port0_valid_i || bus_port1_valid_i;
-    bus_data_o_r  = (bus_port0_valid_i) ? bus_port0_data_i : bus_port1_data_i;
+    if (bus_port0_valid_i)
+    begin
+      bus_data_o_r  = bus_port0_data_i;
+    end
+    else if (bus_port1_valid_i)
+    begin
+      bus_data_o_r  = bus_port1_data_i;
+    end
+    else
+    begin
+      bus_data_o_r  = {DATA_WIDTH{1'b0}};
+    end
   end
   
   generate
