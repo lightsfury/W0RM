@@ -8,15 +8,17 @@ module W0RM_Demo_tb;
   
   always #2.5 clk <= ~clk;
   
-  wire [7:0]  switches, leds;
+  wire  [7:0]   switches, leds, mode_select;
   
   assign switches = 8'h80;
+  assign mode_select = 8'd0;
   
   W0RM_Demo dut(
     .sysclk_p(clk),
     .sysclk_n(~clk),
     .cpu_reset(reset_n),
     .gpio_a(switches),
-    .gpio_b(leds)
+    .gpio_b(leds),
+    .gpio_c(mode_select)
   );
 endmodule

@@ -5,11 +5,11 @@ NOP
 ; Set R4 to value 0x80000080
 MOV R4, #0x80
 LSL R4, #24
-MOV R5, #0x80
+MOV R5, #0x40
 ADD R4, R5
 ; Initialize the GPIO pins
-MOV R2, #0
-SUB R2, #1
+MOV R2, #0xFF
+; SUB R2, #1
 ; Setup the GPIO as outputs
 STORE R2, [R4, #4]
 ; Enable the GPIO pins
