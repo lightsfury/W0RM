@@ -9,8 +9,8 @@ NET   leds[4]   LOC="G16";
 NET   leds[5]   LOC="AD25";
 NET   leds[6]   LOC="AD24";
 NET   leds[7]   LOC="AE24";
-NET   led_north LOC="AG12";
-NET   led_east  LOC="AG23";
+#NET   led_north LOC="AG12";
+#NET   led_east  LOC="AG23";
 #Created by Constraints Editor (xc5vlx110t-ff1136-1) - 2015/04/20
 NET "sysclk_p" TNM_NET = sysclk_p;
 TIMESPEC TS_sysclk_p = PERIOD "sysclk_p" 200 MHz HIGH 50%;

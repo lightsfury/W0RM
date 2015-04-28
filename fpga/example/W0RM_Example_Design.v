@@ -4,9 +4,7 @@ module W0RM_Example_Design(
   input wire        sysclk_p,
                     sysclk_n,
   input wire        cpu_reset,
-  inout wire  [7:0] leds,
-  output wire       led_north,
-                    led_east
+  inout wire  [7:0] leds
 );
   localparam INST_WIDTH = 16;
   localparam DATA_WIDTH = 32;
@@ -185,24 +183,4 @@ module W0RM_Example_Design(
     
     .pin_gpio_pad(leds)
   );
-  
-  reg   [24:0]  counter = 0;
-  
-  always @(posedge core_clk)
-  begin
-    counter <= counter + 1;
-  end
-  
-  assign led_north = counter[24];
-  assign led_east  = counter[23];
-  
-  /*
-  W0RM_Static_Timer #(
-    .LOAD(0),
-    .LIMIT(3)
-  ) led_north_blink (
-    .clk(core_clk),
-    .start(pll_locked),
-    .stop(led_north)
-  ); // */
 endmodule
