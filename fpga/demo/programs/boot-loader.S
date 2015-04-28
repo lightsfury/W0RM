@@ -4,9 +4,10 @@
 NOP
 
 ; Initialize GPIO C
-MOV   R4, #80
+; Setup address 0x80000080
+MOV   R4, #0x80
 LSL   R4, #20
-ADD   R4, #12
+ADD   R4, #0x08
 LSL   R4, #4
 
 ; Setup GPIO C as input
@@ -15,7 +16,7 @@ STORE R2, [R4, #4]
 MOV   R2, #0xFF
 STORE R2, [R4, #0]
 
-MOV   R0, #0xFF
+MOV   R0, #0x08
 
 ; Wait ~64 clock cycles (~1.3us) for the inputs to stabilize
 wait_loop:
@@ -30,13 +31,13 @@ STORE R2, [R4, #0]
 
 AND   R0, #0x03
 
-SUB   R0, #0
+; SUB   R0, #0
 BZS   call_prog_0
 SUB   R0, #1
 BZS   call_prog_1
-SUB   R0, #2
+SUB   R0, #1
 BZS   call_prog_2
-SUB   R0, #3
+SUB   R0, #1
 BZS   call_prog_3
 
 call_prog_0:

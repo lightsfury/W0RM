@@ -1,0 +1,32 @@
+NET   sysclk_p  LOC="L19";
+NET   sysclk_n  LOC="K19";
+NET   cpu_reset LOC="E9";
+NET   gpio_a[0] LOC="H18";
+NET   gpio_a[1] LOC="L18";
+NET   gpio_a[2] LOC="G15";
+NET   gpio_a[3] LOC="AD26";
+NET   gpio_a[4] LOC="G16";
+NET   gpio_a[5] LOC="AD25";
+NET   gpio_a[6] LOC="AD24";
+NET   gpio_a[7] LOC="AE24";
+
+NET   gpio_b[0] LOC="U25";
+NET   gpio_b[1] LOC="AG27";
+NET   gpio_b[2] LOC="AF25";
+NET   gpio_b[3] LOC="AF26";
+NET   gpio_b[4] LOC="AE27";
+NET   gpio_b[5] LOC="AE26";
+NET   gpio_b[6] LOC="AC25";
+NET   gpio_b[7] LOC="AC24";
+
+NET   gpio_c[0] LOC="H33";
+NET   gpio_c[1] LOC="F34";
+NET   gpio_c[2] LOC="H34";
+NET   gpio_c[3] LOC="G33";
+NET   gpio_c[4] LOC="G32";
+NET   gpio_c[5] LOC="H32";
+NET   gpio_c[6] LOC="J32";
+NET   gpio_c[7] LOC="J34";
+
+NET   sysclk_p  TNM_NET = sysclk_p;
+TIMESPEC  TS_sysclk_p = PERIOD sysclk_p 200 MHz HIGH 50%;

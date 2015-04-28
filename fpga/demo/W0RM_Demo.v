@@ -25,7 +25,7 @@ module W0RM_Demo(
   wire  [ADDR_WIDTH-1:0]  mem_addr_o;
   wire  [DATA_WIDTH-1:0]  mem_data_o,
                           mem_data_i;
-  reg                     mem_valid_i = 0;
+  //reg                     mem_valid_i = 0;
   
   wire  [DATA_WIDTH-1:0]  gpio_a_data_i;
   wire                    gpio_a_valid_i;
@@ -33,6 +33,8 @@ module W0RM_Demo(
   wire                    gpio_b_valid_i;
   wire  [DATA_WIDTH-1:0]  gpio_c_data_i;
   wire                    gpio_c_valid_i;
+  wire  [DATA_WIDTH-1:0]  gpio_bc_data_i;
+  wire                    gpio_bc_valid_i;
   wire  [DATA_WIDTH-1:0]  bus_data_i;
   wire                    bus_valid_i;
   
@@ -92,12 +94,13 @@ module W0RM_Demo(
   W0RM_Peripheral_MemoryBlock #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(INST_WIDTH),
-    .MEM_DEPTH(1024),
+    .MEM_DEPTH(256),
     .BASE_ADDR(32'h2000_0000),
     .INIT_FILE("../demo/programs/boot-loader.hex"),
     .USER_WIDTH(ADDR_WIDTH)
   ) boot_loader_rom (
     .mem_clk(core_clk),
+    .cpu_reset(reset_r),
     
     .mem_a_valid_i(inst_valid_o),
     .mem_a_read_i(1'b1),
@@ -113,12 +116,13 @@ module W0RM_Demo(
   W0RM_Peripheral_MemoryBlock #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(INST_WIDTH),
-    .MEM_DEPTH(1024),
+    .MEM_DEPTH(256),
     .BASE_ADDR(32'h2100_0000),
     .INIT_FILE("../demo/programs/blink-led.hex"),
     .USER_WIDTH(ADDR_WIDTH)
   ) prog_0_rom (
     .mem_clk(core_clk),
+    .cpu_reset(reset_r),
     
     .mem_a_valid_i(inst_valid_o),
     .mem_a_read_i(1'b1),
@@ -134,12 +138,13 @@ module W0RM_Demo(
   W0RM_Peripheral_MemoryBlock #(
     .ADDR_WIDTH(ADDR_WIDTH),
     .DATA_WIDTH(INST_WIDTH),
-    .MEM_DEPTH(1024),
+    .MEM_DEPTH(256),
     .BASE_ADDR(32'h2200_0000),
     .INIT_FILE("../demo/programs/switch-copy.hex"),
     .USER_WIDTH(ADDR_WIDTH)
   ) prog_1_rom (
     .mem_clk(core_clk),
+    .cpu_reset(reset_r),
     
     .mem_a_valid_i(inst_valid_o),
     .mem_a_read_i(1'b1),
@@ -152,6 +157,27 @@ module W0RM_Demo(
     .mem_a_user_o(inst_rom_3_addr_o)
   );
   
+  W0RM_Peripheral_Bus_Extender_4port #(
+    .DATA_WIDTH(ADDR_WIDTH + INST_WIDTH)
+  ) bus_extender (
+    .bus_clock(core_clk),
+    
+    .bus_port0_valid_i(inst_rom_1_valid_o),
+    .bus_port0_data_i({inst_rom_1_data_o, inst_rom_1_addr_o}),
+    
+    .bus_port1_valid_i(inst_rom_2_valid_o),
+    .bus_port1_data_i({inst_rom_2_data_o, inst_rom_2_addr_o}),
+    
+    .bus_port2_valid_i(inst_rom_3_valid_o),
+    .bus_port2_data_i({inst_rom_3_data_o, inst_rom_3_addr_o}),
+    
+    .bus_port3_valid_i(1'b0),
+    .bus_port3_data_i({{DATA_WIDTH{1'b0}}, {ADDR_WIDTH{1'b0}}}),
+    
+    .bus_valid_o(inst_rom_valid_o),
+    .bus_data_o({inst_rom_data_o, inst_rom_addr_o})
+  );
+  /*
   W0RM_Peripheral_Bus_Extender #(
     .DATA_WIDTH(ADDR_WIDTH + INST_WIDTH)
   ) inst_123_mux (
@@ -181,6 +207,7 @@ module W0RM_Demo(
     .bus_valid_o(inst_rom_23_valid_o),
     .bus_data_o({inst_rom_23_data_o, inst_rom_23_addr_o})
   );
+  // */
   
   /*
   W0RM_Example_Design_Instruction_ROM example_rom(
@@ -236,11 +263,24 @@ module W0RM_Demo(
     .bus_port0_valid_i(gpio_a_valid_i),
     .bus_port0_data_i(gpio_a_data_i),
     
-    .bus_port1_valid_i(gpio_b_valid_i),
-    .bus_port1_data_i(gpio_b_data_i),
+    .bus_port1_valid_i(gpio_bc_valid_i),
+    .bus_port1_data_i(gpio_bc_data_i),
     
     .bus_valid_o(gpio_bus_valid_i),
     .bus_data_o(gpio_bus_data_i)
+  );
+  
+  W0RM_Peripheral_Bus_Extender bus_extender3(
+    .bus_clock(core_clk),
+    
+    .bus_port0_valid_i(gpio_b_valid_i),
+    .bus_port0_data_i(gpio_b_data_i),
+    
+    .bus_port1_valid_i(gpio_c_valid_i),
+    .bus_port1_data_i(gpio_c_data_i),
+    
+    .bus_valid_o(gpio_bc_valid_i),
+    .bus_data_o(gpio_bc_data_i)
   );
   
   W0RM_Peripheral_GPIO #(
@@ -306,6 +346,28 @@ module W0RM_Demo(
     .pin_gpio_pad(gpio_c)
   );
   
+  W0RM_Peripheral_MemoryBlock #(
+    .ADDR_WIDTH(ADDR_WIDTH),
+    .DATA_WIDTH(DATA_WIDTH),
+    .MEM_DEPTH(1024),
+    .USER_WIDTH(1),
+    .USE_BRAM(1)
+  ) main_memory (
+    .mem_clk(core_clk),
+    .cpu_reset(reset_r),
+    
+    .mem_a_valid_i(mem_valid_o),
+    .mem_a_read_i(mem_read_o),
+    .mem_a_write_i(mem_write_o),
+    .mem_a_addr_i(mem_addr_o),
+    .mem_a_data_i(mem_data_o),
+    .mem_a_valid_o(mem_valid_i),
+    .mem_a_data_o(mem_data_i),
+    .mem_a_user_i(1'b0),
+    .mem_a_user_o() // Not used
+  );
+  
+  /*
   W0RM_CoreRAM_Block main_memory(
     // Port A is not used in this example
     .clka(1'b0),
@@ -321,5 +383,5 @@ module W0RM_Demo(
     .addrb(mem_addr_o[11:2]),
     .dinb(mem_data_o),
     .doutb(mem_data_i)
-  );
+  ); // */
 endmodule

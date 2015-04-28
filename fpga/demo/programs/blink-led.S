@@ -2,7 +2,7 @@
 ; This program uses a delay loop to toggle an LED
 NOP
 ; Setup the memory address
-; Set R4 to value 0x80000080
+; Set R4 to value 0x80000040
 MOV R4, #0x80
 LSL R4, #24
 MOV R5, #0x40
