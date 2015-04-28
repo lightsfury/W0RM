@@ -185,8 +185,6 @@ module W0RM_TopLevel #(
   
   wire  [DATA_WIDTH-1:0]  branch_result;
   
-//  reg   [DATA_WIDTH-1:0]  rstore_reg_write_data = 0;
-  
   reg   [ADDR_WIDTH-1:0]  mem_addr = 0;
   reg   [DATA_WIDTH-1:0]  mem_data = 0;
   reg   [DATA_WIDTH-1:0]  rstore_reg_write_data_r = 0;
@@ -650,8 +648,6 @@ decode_reg_write_addr // 4
   reg                             memory_write,
                                   memory_read,
                                   memory_is_pop;
-  //reg   [ADDR_WIDTH-1:0]          memory_addr;
-  //reg   [DATA_WIDTH-1:0]          memory_data;
   
   always @(*)
   begin
