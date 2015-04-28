@@ -92,8 +92,8 @@ module W0RM_Core_ALU #(
         ce_shifts   = 0,
         ce_ext      = 0;
   
-  reg   [USER_WIDTH-1:0]  user_data_r = 0,
-                          user_data_r2 = 0;
+  reg   [USER_WIDTH-1:0]  user_data_r = 0;
+  //                        user_data_r2 = 0;
   reg                     long_opcode = 0;
   reg                     ext_bit_size_r = 0;
   

@@ -49,8 +49,8 @@ module W0RM_Core_RegisterFile #(
   
   localparam REG_ADDR_BITS = log2(NUM_REGISTERS);
 
-  input wire                        clk,
-                                    flush;
+  input wire                      clk,
+                                  flush;
   
   // Read port 0
   input wire  [REG_ADDR_BITS-1:0] port_read0_addr;
@@ -79,23 +79,23 @@ module W0RM_Core_RegisterFile #(
   assign reg_file_ready = alu_ready;
   
   // Register file
-  reg   [DATA_WIDTH-1:0]  registers [NUM_REGISTERS - 1:0];
+  reg   [DATA_WIDTH-1:0]    registers [NUM_REGISTERS - 1:0];
   
-  reg   [DATA_WIDTH-1:0]  port0_data_r = 0,
-                          port1_data_r = 0;
+  reg   [DATA_WIDTH-1:0]    port0_data_r = 0,
+                            port1_data_r = 0;
   reg   [REG_ADDR_BITS-1:0] port0_addr_r = 0,
                             port1_addr_r = 0;
 
-  reg   [USER_WIDTH-1:0]  user_data_r = 0;
-  reg                     rfetch_valid_r = 0;
+  reg   [USER_WIDTH-1:0]    user_data_r = 0;
+  reg                       rfetch_valid_r = 0;
                           
-  //assign port_read0_data  = port0_data_r;
-  //assign port_read1_data  = port1_data_r;
+  assign port_read0_data  = port0_data_r;
+  assign port_read1_data  = port1_data_r;
   assign user_data_out    = user_data_r;
   assign rfetch_valid     = rfetch_valid_r;
   
-  assign port_read0_data  = registers[port0_addr_r];
-  assign port_read1_data  = registers[port1_addr_r];
+  //assign port_read0_data  = registers[port0_addr_r];
+  //assign port_read1_data  = registers[port1_addr_r];
   
   integer i;
   initial
@@ -118,66 +118,51 @@ module W0RM_Core_RegisterFile #(
         registers[i] <= 0;
       end
     end
-    // Write action
-    else if (port_write_enable)
-    begin
-      registers[port_write_addr] <= port_write_data;
-      
-      /*
-      // Write before read
-      if (port_read0_addr == port_write_addr)
-      begin
-        port0_data_r <= port_write_data;
-      end
-      else
-      begin
-        port0_data_r <= registers[port_read0_addr];
-      end
-      
-      if (port_read1_addr == port_write_addr)
-      begin
-        port1_data_r <= port_write_data;
-      end
-      else
-      begin
-        port1_data_r <= registers[port_read1_addr];
-      end // */
-    end
-    else
-    begin
-      // No write action
-      //port0_data_r <= registers[port_read0_addr];
-      //port1_data_r <= registers[port_read1_addr];
-    end
-    
-    if (flush)
+    // Flush action
+    else if (flush)
     begin
       user_data_r     <= {USER_WIDTH{1'b0}};
       rfetch_valid_r  <= 1'b0;
     end
-    else if (alu_ready)
+    // Write action
+    else if (port_write_enable)
     begin
+      registers[port_write_addr] <= port_write_data;
+    end
+    
+    if (~flush && alu_ready)
+    begin
+      rfetch_valid_r  <= decode_valid;
       if (decode_valid)
       begin
-        user_data_r     <= user_data_in;
-        rfetch_valid_r  <= 1'b1;
-        port0_addr_r    <= port_read0_addr;
-        port1_addr_r    <= port_read1_addr;
+        user_data_r <= user_data_in;
+        // Write first action
+        if (port_write_enable)
+        begin
+          if (port_write_addr == port_read0_addr)
+          begin
+            port0_data_r  <= port_write_data;
+          end
+          else
+          begin
+            port0_data_r  <= registers[port_read0_addr];
+          end
+          
+          if (port_write_addr == port_read1_addr)
+          begin
+            port1_data_r  <= port_write_data;
+          end
+          else
+          begin
+            port1_data_r  <= registers[port_read1_addr];
+          end
+        end
+        else
+        begin
+            port0_data_r  <= registers[port_read0_addr];
+            port1_data_r  <= registers[port_read1_addr];
+        end
       end
-      else
-      begin
-        user_data_r     <= {USER_WIDTH{1'b0}};
-        rfetch_valid_r  <= 1'b0;
-      end
-    end /*
-    else if (decode_valid && alu_ready)
-    begin
-      user_data_r     <= user_data_in;
-      rfetch_valid_r  <= 1'b1;
     end
-    else
-    begin
-      rfetch_valid_r <= decode_valid;
-    end // */
   end
 endmodule

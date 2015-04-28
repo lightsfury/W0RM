@@ -90,7 +90,7 @@ module W0RM_Core_IFetch #(
             inst_data_r       <= inst_data_in;
           end
         end
-        else
+        else if (~flush_i)
         begin
           reg_pc_r            <= last_inst_addr_r + 2;
         end
