@@ -6,9 +6,11 @@ module W0RM_Peripheral_MemoryBlock #(
   parameter MEM_DEPTH   = 512,
   parameter BASE_ADDR   = 32'h4000_0000,
   parameter INIT_FILE   = "",
-  parameter USER_WIDTH  = 32
+  parameter USER_WIDTH  = 32,
+  parameter USE_BRAM    = 0
 )(
   input wire                    mem_clk,
+  input wire                    cpu_reset,
   
   // Port A
   input wire                    mem_a_valid_i,
@@ -24,76 +26,70 @@ module W0RM_Peripheral_MemoryBlock #(
 );
   // log base 2 function
   function integer log2(input integer n);
-	integer i, j;
+  integer i, j;
     begin
-		i = 1;
-		j = 0;
+    i = 1;
+    j = 0;
       //integer i = 1, j = 0;
       while (i < n)
       begin
         j = j + 1;
         i = i << 1;
       end
-		log2 = j;
+    log2 = j;
     end
   endfunction
   
-  localparam  MEM_ADDR_START  = BASE_ADDR;
-  localparam  MEM_ADDR_STOP   = BASE_ADDR + MEM_DEPTH;
-  localparam  MEM_LOW         = log2(DATA_WIDTH / 8);
-  localparam  MEM_HIGH        = log2(MEM_DEPTH) + MEM_LOW;
-  localparam  MEM_ADDR_INT_W  = log2(MEM_DEPTH);
-  
-  reg [DATA_WIDTH-1:0]  mem_contents  [MEM_DEPTH:0];
-  
-  wire  mem_a_decode_ce = (mem_a_addr_i >= BASE_ADDR) && (mem_a_addr_i < MEM_ADDR_STOP);
-  wire  [MEM_ADDR_INT_W:0]  mem_a_addr_int  = mem_a_addr_i[MEM_HIGH:MEM_LOW];
-  
-  reg                       mem_a_valid_r = 0;
-  reg   [MEM_ADDR_INT_W:0]  mem_a_addr_r  = 0;
-  reg   [USER_WIDTH-1:0]    mem_a_user_r  = 0;
-  
-  assign mem_a_user_o   = mem_a_user_r;
-  assign mem_a_valid_o  = mem_a_valid_r;
-  assign mem_a_data_o   = mem_contents[mem_a_addr_r];
-  
-  genvar i;
   generate
-    if (INIT_FILE == "")
+    if (USE_BRAM == 1)
     begin
-      for (i = 0; i < MEM_DEPTH; i = i + 1)
-      begin: mem_contents_init
-        initial
-          mem_contents[i] = {DATA_WIDTH{1'b0}};
-      end
+      W0RM_Peripheral_MemoryBlock_BRAM #(
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_DEPTH(MEM_DEPTH),
+        .BASE_ADDR(BASE_ADDR),
+        .INIT_FILE(INIT_FILE),
+        .USER_WIDTH(USER_WIDTH)
+      ) bram (
+        .mem_clk(mem_clk),
+        .cpu_reset(cpu_reset),
+        
+        .mem_a_valid_i(mem_a_valid_i),
+        .mem_a_read_i(mem_a_read_i),
+        .mem_a_write_i(mem_a_write_i),
+        .mem_a_addr_i(mem_a_addr_i),
+        .mem_a_data_i(mem_a_data_i),
+        .mem_a_valid_o(mem_a_valid_o),
+        .mem_a_data_o(mem_a_data_o),
+        
+        .mem_a_user_i(mem_a_user_i),
+        .mem_a_user_o(mem_a_user_o)
+      );
     end
     else
     begin
-      for (i = 0; i < MEM_DEPTH; i = i + 1)
-      begin: mem_contents_init
-        initial
-          mem_contents[i] = {DATA_WIDTH{1'b0}};
-      end
-      initial
-      begin
-        $display("Reading memory contents from '%s'.", INIT_FILE);
-        $readmemh(INIT_FILE, mem_contents);
-      end
+      W0RM_Peripheral_MemoryBlock_RTL #(
+        .ADDR_WIDTH(ADDR_WIDTH),
+        .DATA_WIDTH(DATA_WIDTH),
+        .MEM_DEPTH(MEM_DEPTH),
+        .BASE_ADDR(BASE_ADDR),
+        .INIT_FILE(INIT_FILE),
+        .USER_WIDTH(USER_WIDTH)
+      ) rtl (
+        .mem_clk(mem_clk),
+        .cpu_reset(cpu_reset),
+        
+        .mem_a_valid_i(mem_a_valid_i),
+        .mem_a_read_i(mem_a_read_i),
+        .mem_a_write_i(mem_a_write_i),
+        .mem_a_addr_i(mem_a_addr_i),
+        .mem_a_data_i(mem_a_data_i),
+        .mem_a_valid_o(mem_a_valid_o),
+        .mem_a_data_o(mem_a_data_o),
+        
+        .mem_a_user_i(mem_a_user_i),
+        .mem_a_user_o(mem_a_user_o)
+      );
     end
   endgenerate
-  
-  always @(posedge mem_clk)
-  begin
-    if (mem_a_valid_i && mem_a_decode_ce)
-    begin
-      mem_a_addr_r <= mem_a_addr_int;
-      if (mem_a_write_i)
-      begin
-        mem_contents[mem_a_addr_int] <= mem_a_data_i;
-      end
-      mem_a_user_r <= mem_a_user_i;
-    end
-    
-    mem_a_valid_r <= mem_a_valid_i && mem_a_decode_ce && (mem_a_read_i || mem_a_write_i);
-  end
 endmodule
