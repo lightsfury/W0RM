@@ -479,13 +479,6 @@
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="216"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="216"/>
     </file>
-    <file xil_pn:name="example-2/W0RM_Example_2.v" xil_pn:type="FILE_VERILOG">
-      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
-      <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
-    </file>
-    <file xil_pn:name="example-2/W0RM_Example_2.ucf" xil_pn:type="FILE_UCF">
-      <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
-    </file>
     <file xil_pn:name="ipcore_dir/W0RM_Example_2_PLL.xaw" xil_pn:type="FILE_XAW">
       <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
@@ -544,6 +537,30 @@
       <association xil_pn:name="PostMapSimulation" xil_pn:seqID="382"/>
       <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="382"/>
       <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="382"/>
+    </file>
+    <file xil_pn:name="testbench/core/Core_amal_tb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="PostMapSimulation" xil_pn:seqID="389"/>
+      <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="389"/>
+      <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="389"/>
+    </file>
+    <file xil_pn:name="testbench/core/Visual_tests_tb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="PostMapSimulation" xil_pn:seqID="390"/>
+      <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="390"/>
+      <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="390"/>
+    </file>
+    <file xil_pn:name="testbench/peripheral/Periph_amal_tb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="PostMapSimulation" xil_pn:seqID="391"/>
+      <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="391"/>
+      <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="391"/>
+    </file>
+    <file xil_pn:name="testbench/peripheral/Periph_visual_tb.v" xil_pn:type="FILE_VERILOG">
+      <association xil_pn:name="BehavioralSimulation" xil_pn:seqID="0"/>
+      <association xil_pn:name="PostMapSimulation" xil_pn:seqID="392"/>
+      <association xil_pn:name="PostRouteSimulation" xil_pn:seqID="392"/>
+      <association xil_pn:name="PostTranslateSimulation" xil_pn:seqID="392"/>
     </file>
     <file xil_pn:name="ipcore_dir/W0RM_Int_AddSub.xise" xil_pn:type="FILE_COREGENISE">
       <association xil_pn:name="Implementation" xil_pn:seqID="0"/>
@@ -807,7 +824,7 @@
     <property xil_pn:name="Safe Implementation" xil_pn:value="No" xil_pn:valueState="default"/>
     <property xil_pn:name="Security" xil_pn:value="Enable Readback and Reconfiguration" xil_pn:valueState="default"/>
     <property xil_pn:name="SelectMAP Abort Sequence" xil_pn:value="Enable" xil_pn:valueState="default"/>
-    <property xil_pn:name="Selected Module Instance Name" xil_pn:value="/LCD_1_tb" xil_pn:valueState="non-default"/>
+    <property xil_pn:name="Selected Module Instance Name" xil_pn:value="/Periph_visual_tb/lcd_1_tb" xil_pn:valueState="non-default"/>
     <property xil_pn:name="Selected Simulation Root Source Node Behavioral" xil_pn:value="work.LCD_1_tb" xil_pn:valueState="non-default"/>
     <property xil_pn:name="Selected Simulation Root Source Node Post-Map" xil_pn:value="" xil_pn:valueState="default"/>
     <property xil_pn:name="Selected Simulation Root Source Node Post-Route" xil_pn:value="" xil_pn:valueState="default"/>
@@ -894,7 +911,6 @@
   </properties>
 
   <bindings>
-    <binding xil_pn:location="/W0RM_Example_2" xil_pn:name="example-2/W0RM_Example_2.ucf"/>
     <binding xil_pn:location="/W0RM_Example_Design" xil_pn:name="example/W0RM_Example_Design.ucf"/>
     <binding xil_pn:location="/W0RM_Example_Design" xil_pn:name="W0RM_Example_ChipScope.cdc"/>
     <binding xil_pn:location="/W0RM_Demo" xil_pn:name="demo/W0RM_Demo.ucf"/>

@@ -1,6 +1,9 @@
 `timescale 1ns/100ps
 
-module RegsterFile_tb1;
+module RegisterFile_tb1(
+  output wire done,
+              error
+);
   RegisterFile_base_tb #(
     .DATA_WIDTH(8),
     .NUM_REGISTERS(4),

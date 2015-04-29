@@ -48,6 +48,7 @@ module W0RM_Peripheral_CharLCD_4bit #(
                   lcd_en_setup_wait   = 0;
   reg   [7:0]     lcd_driver_data_r   = 0;
   reg   [3:0]     lcd_driver_data_o   = 0;
+  reg             lcd_bus_output_en   = 0;
   wire  [3:0]     lcd_bus_data_i,
                   lcd_bus_data_o;
   wire            lcd_cmd_setup_wait_done,
@@ -64,7 +65,6 @@ module W0RM_Peripheral_CharLCD_4bit #(
   reg                     mem_valid_o_r = 0;
   reg   [DATA_WIDTH-1:0]  mem_data_o_r = 0;
   
-  
   assign lcd_bus_data_o       = lcd_driver_data_o;
   assign lcd_bus_async_enable = lcd_driver_en;
   assign lcd_bus_read_write   = lcd_driver_rw;
@@ -77,13 +77,14 @@ module W0RM_Peripheral_CharLCD_4bit #(
     for (i = 0; i < 4; i = i + 1)
     begin: generate_iobuf
       IOBUF lcd_bus_data_iobuf(
-        .T(lcd_driver_rw),
+        .T(~lcd_bus_output_en),
         .I(lcd_bus_data_o[i]),
         .O(lcd_bus_data_i[i]),
         .IO(lcd_bus_data[i])
       );
     end
   endgenerate
+  
   always @(posedge mem_clk)
   begin
     if (cpu_reset)
@@ -150,7 +151,7 @@ module W0RM_Peripheral_CharLCD_4bit #(
             begin
               if (mem_addr_i[DECODE_HIGH:DECODE_LOW] == ADDR_INST)
               begin
-                lcd_driver_data_r   <= lcd_reg_inst[7:0];
+                lcd_driver_data_r   <= mem_data_i[7:0];
                 lcd_driver_rs       <= 1'b1;
                 lcd_driver_rw       <= 1'b0;
                 lcd_driver_state_r  <= LCD_DRIVER_STATE_CmdSetup;
@@ -159,7 +160,7 @@ module W0RM_Peripheral_CharLCD_4bit #(
               end
               else if (mem_addr_i[DECODE_HIGH:DECODE_LOW] == ADDR_DATA)
               begin
-                lcd_driver_data_r   <= lcd_reg_data[7:0];
+                lcd_driver_data_r   <= mem_data_i[7:0];
                 lcd_driver_rs       <= 1'b0;
                 lcd_driver_rw       <= 1'b0;
                 lcd_driver_state_r  <= LCD_DRIVER_STATE_CmdSetup;
@@ -182,6 +183,7 @@ module W0RM_Peripheral_CharLCD_4bit #(
             if (lcd_cmd_setup_wait_done)
             begin
               lcd_driver_en       <= 1'b1;
+              lcd_bus_output_en   <= 1'b1;
               lcd_en_setup_wait   <= 1'b1;
               lcd_driver_state_r  <= LCD_DRIVER_STATE_EnMinHigh;
               lcd_driver_data_o   <= lcd_driver_data_r[7:4];
@@ -236,6 +238,7 @@ module W0RM_Peripheral_CharLCD_4bit #(
           
           LCD_DRIVER_STATE_CmdHold:
           begin
+            lcd_bus_output_en <= 1'b0;
             lcd_en_setup_wait <= 1'b0;
             lcd_driver_en     <= 1'b0;
             lcd_driver_rs     <= 1'b0;

@@ -1,6 +1,9 @@
 `timescale 1ns/100ps
 
-module RegsterFile_2p1_tb;
+module RegisterFile_2p1_tb(
+  output wire done,
+              error
+);
   RegisterFile_2_port_base_tb #(
     .DATA_WIDTH(8),
     .NUM_REGISTERS(4),

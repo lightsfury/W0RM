@@ -1,6 +1,9 @@
 `timescale 1ns/100ps
 
-module RegsterFile_wbr1_tb;
+module RegisterFile_wbr1_tb(
+  output wire done,
+              error
+);
   RegisterFile_write_before_read_tb #(
     .DATA_WIDTH(8),
     .NUM_REGISTERS(4),
