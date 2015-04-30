@@ -42,7 +42,7 @@ module W0RM_Core_IFetch #(
       reg                     inst_valid_r = 0;
       reg   [ADDR_WIDTH-1:0]  last_inst_addr_r = START_PC;
       
-      assign flush_i          = flush_next_inst_r || flush_next_inst_r2 || flush_next_inst_r3;
+      assign flush_i          = flush_next_inst_r;// || flush_next_inst_r2 || flush_next_inst_r3;
       assign reg_pc           = reg_pc_r;
       assign inst_valid_out   = inst_valid_r && ~reset;
       assign inst_data_out    = inst_data_r;
@@ -66,6 +66,7 @@ module W0RM_Core_IFetch #(
         begin
           reg_pc_r          <= next_pc;
           inst_addr_r       <= next_pc;
+          last_inst_addr_r  <= next_pc - 2;
           flush_next_inst_r <= 1'b1;
           inst_valid_r      <= 1'b0;
         end
@@ -75,19 +76,26 @@ module W0RM_Core_IFetch #(
           flush_next_inst_r   <= 1'b0;
           flush_next_inst_r2  <= flush_next_inst_r;
           flush_next_inst_r3  <= flush_next_inst_r2;
-          last_inst_addr_r    <= (inst_valid_in && ~flush_i) ? inst_addr_in : inst_addr_r;
+          last_inst_addr_r    <= (inst_valid_in && ~flush_i) ? inst_addr_in : last_inst_addr_r;
           
-          if (/* inst_valid_in && */~flush_i)
+          if (~flush_i)
           begin
-            reg_pc_r            <= reg_pc_r + 2;
-            inst_addr_r         <= inst_addr_in;
-            inst_data_r         <= inst_data_in;
+            if (reg_pc_valid)
+            begin
+              reg_pc_r          <= reg_pc_r + 2;
+              inst_addr_r       <= inst_addr_in;
+              inst_data_r       <= inst_data_in;
+            end
+            else
+            begin
+              reg_pc_r          <= reg_pc_r;
+              inst_addr_r       <= inst_addr_in;
+              inst_data_r       <= inst_data_in;
+            end
           end
-          else
+          else // Flush
           begin
-            reg_pc_r          <= reg_pc_r;
-            inst_addr_r       <= inst_addr_in;
-            inst_data_r       <= inst_data_in;
+            reg_pc_r            <= last_inst_addr_r + 2;
           end
         end
         else if (~flush_i)

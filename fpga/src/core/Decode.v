@@ -1,7 +1,5 @@
 `timescale 1ns/100ps
 
-//! @todo Add stall when forwarding from LOAD or POP
-
 module W0RM_Core_Decode #(
   parameter SINGLE_CYCLE  = 0,
   parameter INST_WIDTH    = 16,
@@ -49,7 +47,6 @@ module W0RM_Core_Decode #(
   output wire                   decode_reg_write,
   output wire [1:0]             decode_reg_write_source,
   output wire [ADDR_WIDTH-1:0]  decode_reg_write_addr
-  //! @todo Create control buses for RegFetch, ALU, Memory, RegWrite stages
 );
   localparam INST_IDENT_HIGH  = INST_WIDTH - 1;
   localparam INST_IDENT_LOW   = INST_IDENT_HIGH - 3;
@@ -180,21 +177,6 @@ module W0RM_Core_Decode #(
   localparam MEM_ADDR_SRC_ALU     = 2'd2;
   localparam MEM_ADDR_SRC_LIT     = 2'd3;
   
-  /*
-  localparam MEM_WRITE_SOURCE_RN  = 0;
-  localparam MEM_WRITE_SOURCE_RD  = 1;
-  localparam MEM_WRITE_SOURCE_ALU = 2;
-  localparam MEM_WRITE_SOURCE_LIT = 3;
-  localparam MEM_WRITE_FWD_MEM    = 4;
-  localparam MEM_WRITE_FWD_ALU    = 5;
-  
-  localparam MEM_ADDR_SRC_ALU  = 0;
-  localparam MEM_ADDR_SRC_RN   = 1;
-  localparam MEM_ADDR_SRC_RD   = 2;
-  localparam MEM_ADDR_SRC_LIT  = 3;
-  localparam MEM_ADDR_FWD_MEM     = 4;
-  localparam MEM_ADDR_FWD_ALU     = 5; // */
-  
   localparam ALU_OP1_SOURCE_RD  = 2'd0;
   localparam ALU_OP1_SOURCE_RN  = 2'd1;
   localparam ALU_OP1_SOURCE_LIT = 2'd2;
@@ -207,23 +189,6 @@ module W0RM_Core_Decode #(
   localparam ALU_REG_FWD_ALU    = 2'd1;
   localparam ALU_REG_FWD_MEM    = 2'd2;
   localparam ALU_REG_FWD_RSTORE = 2'd3;
-  
-  /*
-  localparam ALU_OP2_SOURCE_RD  = 0;
-  localparam ALU_OP2_SOURCE_RN  = 1;
-  localparam ALU_OP2_SOURCE_LIT = 2;
-  localparam ALU_OP2_FWD_ALU    = 3;
-  localparam ALU_OP2_FWD_MEM    = 4;
-  
-  localparam ALU_OP2_SOURCE_REG = 0;
-  localparam ALU_OP2_SOURCE_LIT = 1;
-  localparam ALU_OP2_FWD_ALU    = 2;
-  localparam ALU_OP2_FWD_MEM    = 3;
-  
-  localparam ALU_OP1_FWD_NONE   = 0;
-  localparam ALU_OP1_FWD_ALU    = 1;
-  localparam ALU_OP1_FWD_MEM    = 2;
-  localparam ALU_OP1_SOURCE_RN  = 3; // */
   
   localparam REG_ADDR_STACK_REG = 13;
   localparam REG_ADDR_LINK_REG  = 14;
@@ -264,23 +229,16 @@ module W0RM_Core_Decode #(
   reg                     reg_write_r = 0;
   reg   [1:0]             reg_write_source_r = 0;
   reg   [ADDR_WIDTH-1:0]  reg_write_addr_r = 0;
-  reg                     control_valid_r = 0;
-  reg                     decode_ready_r = 0;
   reg                     alu_reg_write_r = 0,
                           mem_reg_write_r = 0,
                           rstore_reg_write_r = 0;
   reg   [ADDR_WIDTH-1:0]  alu_reg_addr_r = 0,
                           mem_reg_addr_r = 0,
                           rstore_reg_addr_r = 0;
-  reg   [1:0]             alu_op1_select_r = 0,
-                          alu_op2_select_r = 0,
-                          alu_op1_select_i = 0,
+  reg   [1:0]             alu_op1_select_i = 0,
                           alu_op2_select_i = 0;
   reg                     alu_mem_read_r = 0,
                           mem_mem_read_r = 0;
-  //reg                      rstore_mem_read_r = 0;
-  reg   [2:0]             mem_data_src_i = 0,
-                          mem_addr_src_i = 0;
   reg   [1:0]             rd_fwd_r = 0,
                           rn_fwd_r = 0;
   reg                     stall = 0;
@@ -317,7 +275,6 @@ module W0RM_Core_Decode #(
       
       alu_mem_read_r      <= memory_read_r && ~stall;
       mem_mem_read_r      <= alu_mem_read_r;
-      //rstore_mem_read_r   <= mem_mem_read_r;
     end
   end
   
@@ -602,8 +559,6 @@ module W0RM_Core_Decode #(
           reg_write_addr_r    = instruction_r[INST_PUPO_RD_HIGH:INST_PUPO_RD_LOW];
           
           bad_inst            = 0;
-          
-          //! @todo Do I need a 2nd register write port?
         end
         
         INST_IDENT_Bucnd:
@@ -713,13 +668,11 @@ module W0RM_Core_Decode #(
       if (rstore_reg_write_r && (rstore_reg_addr_r == rd_addr_r))
       begin
         rd_fwd_r  = ALU_REG_FWD_RSTORE;
-        //stall     = rstore_mem_read_r;
       end
   
       if (rstore_reg_write_r && (rstore_reg_addr_r == rn_addr_r))
       begin
         rn_fwd_r  = ALU_REG_FWD_RSTORE;
-        //stall     = rstore_mem_read_r;
       end
       
       if (mem_reg_write_r && (mem_reg_addr_r == rd_addr_r))
@@ -732,7 +685,7 @@ module W0RM_Core_Decode #(
       begin
         rn_fwd_r  = ALU_REG_FWD_MEM;
         stall     = mem_mem_read_r;
-      end // */
+      end
       
       if (alu_reg_write_r && (alu_reg_addr_r == rd_addr_r))
       begin
@@ -785,6 +738,4 @@ module W0RM_Core_Decode #(
   assign decode_reg_write_source = reg_write_source_r;
   assign decode_reg_write_addr   = reg_write_addr_r;
   assign decode_inst             = instruction_r;
-  
-  //assign decode_ready = decode_ready_r;
 endmodule

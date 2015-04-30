@@ -37,7 +37,6 @@ module W0RM_Core_RegisterFile #(
     begin
 		i = 1;
 		j = 0;
-      //integer i = 1, j = 0;
       while (i < n)
       begin
         j = j + 1;
@@ -83,8 +82,6 @@ module W0RM_Core_RegisterFile #(
   
   reg   [DATA_WIDTH-1:0]    port0_data_r = 0,
                             port1_data_r = 0;
-  reg   [REG_ADDR_BITS-1:0] port0_addr_r = 0,
-                            port1_addr_r = 0;
 
   reg   [USER_WIDTH-1:0]    user_data_r = 0;
   reg                       rfetch_valid_r = 0;
@@ -93,9 +90,6 @@ module W0RM_Core_RegisterFile #(
   assign port_read1_data  = port1_data_r;
   assign user_data_out    = user_data_r;
   assign rfetch_valid     = rfetch_valid_r;
-  
-  //assign port_read0_data  = registers[port0_addr_r];
-  //assign port_read1_data  = registers[port1_addr_r];
   
   integer i;
   initial
