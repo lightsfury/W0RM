@@ -2,11 +2,11 @@
 ; This program uses a delay loop to toggle an LED
 NOP
 ; Setup the memory address
-; Set R4 to value 0x80000040
+; Set R4 to value 0x80000000
 MOV R4, #0x80
 LSL R4, #24
-MOV R5, #0x40
-ADD R4, R5
+; MOV R5, #0x00
+; ADD R4, R5
 ; Initialize the GPIO pins
 MOV R2, #0xFF
 ; SUB R2, #1

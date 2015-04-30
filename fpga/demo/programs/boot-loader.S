@@ -1,6 +1,8 @@
 ; Walnut Zero RISC Machine example program boot loader
 ; This program reads the values on GPIO C and loads the specified program
 
+main:
+
 NOP
 
 ; Initialize GPIO C
@@ -16,7 +18,7 @@ STORE R2, [R4, #4]
 MOV   R2, #0xFF
 STORE R2, [R4, #0]
 
-MOV   R0, #0x08
+MOV   R0, #0x80
 
 ; Wait ~64 clock cycles (~1.3us) for the inputs to stabilize
 wait_loop:
@@ -39,6 +41,9 @@ SUB   R0, #1
 BZS   call_prog_2
 SUB   R0, #1
 BZS   call_prog_3
+
+; Jump back to main
+B     main
 
 call_prog_0:
 ; Branch to 0x2100_0000
