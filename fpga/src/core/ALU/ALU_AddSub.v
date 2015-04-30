@@ -32,8 +32,6 @@ module W0RM_ALU_AddSub #(
   reg                     flag_carry_r = 0,
                           flag_carry_i = 0,
                           result_valid_r = 0;
-  wire  [DATA_WIDTH-1:0]  add_sub_result;
-  wire                    flag_carry;
   reg   [DATA_WIDTH-1:0]  result_i = 0;
   
   assign result_flags[ALU_FLAG_ZERO]  = result_r == 0;
@@ -92,29 +90,4 @@ module W0RM_ALU_AddSub #(
       end
     end
   endgenerate
-  
-  /*
-  
-  always @(posedge clk)
-  begin
-    if (data_valid)
-    begin
-      result_r      <= add_sub_result;
-      flag_carry_r  <= flag_carry;
-      data_a_r      <= data_a;
-      data_b_r      <= data_b;
-    end
-    
-    result_valid_r <= data_valid;
-  end
-  
-  W0RM_Int_AddSub add_sub(
-    .a(data_a),
-    .b(data_b),
-    .add(opcode == ALU_OPCODE_ADD),
-    
-    .s(add_sub_result),
-    
-    .c_out(flag_carry)
-  ); // */
 endmodule
