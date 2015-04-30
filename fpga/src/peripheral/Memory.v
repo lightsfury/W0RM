@@ -42,7 +42,7 @@ module W0RM_Peripheral_MemoryBlock #(
   
   generate
     if (USE_BRAM == 1)
-    begin
+    begin: generate_bram
       W0RM_Peripheral_MemoryBlock_BRAM #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
@@ -67,7 +67,7 @@ module W0RM_Peripheral_MemoryBlock #(
       );
     end
     else
-    begin
+    begin : generate_rtl
       W0RM_Peripheral_MemoryBlock_RTL #(
         .ADDR_WIDTH(ADDR_WIDTH),
         .DATA_WIDTH(DATA_WIDTH),
