@@ -10,15 +10,19 @@ module W0RM_Demo_tb;
   
   wire  [7:0]   switches, leds, mode_select;
   
-  assign switches = 8'h80;
-  assign mode_select = 8'd0;
+  reg   [7:0]   sw = 0;
+  
+  assign switches = sw;
+  assign mode_select = 8'd1;
+  
+  always #5_000 sw <= sw + 1;
   
   W0RM_Demo dut(
     .sysclk_p(clk),
     .sysclk_n(~clk),
     .cpu_reset(reset_n),
-    .gpio_a(switches),
-    .gpio_b(leds),
+    .gpio_a(leds),
+    .gpio_b(switches),
     .gpio_c(mode_select)
   );
 endmodule

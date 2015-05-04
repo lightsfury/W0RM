@@ -1,6 +1,7 @@
 NET   sysclk_p  LOC="L19";
 NET   sysclk_n  LOC="K19";
 NET   cpu_reset LOC="E9";
+
 NET   gpio_a[0] LOC="H18";
 NET   gpio_a[1] LOC="L18";
 NET   gpio_a[2] LOC="G15";
