@@ -219,7 +219,7 @@ module W0RM_Core_Branch #(
       end
       
       data_valid_r    <= data_valid && branch_ready;
-      branch_valid_r  <= data_valid_r && branch_ready;
+      branch_valid_r  <= data_valid_r && branch_taken && branch_ready;
     end
   end
 endmodule

@@ -589,10 +589,17 @@ decode_reg_write_addr // 4
     
     //.alu_flags(result_flags_forward),
     
+    /*
     .alu_flag_zero(alu_flag_zero_forward),
     .alu_flag_negative(alu_flag_negative_forward),
     .alu_flag_carry(alu_flag_carry_forward),
     .alu_flag_overflow(alu_flag_overflow_forward),
+    // */
+    
+    .alu_flag_zero(alu_flag_zero),
+    .alu_flag_negative(alu_flag_negative),
+    .alu_flag_carry(alu_flag_carry),
+    .alu_flag_overflow(alu_flag_overflow),
     
     .branch_base_addr(rfetch_branch_base_addr),
     .branch_rel_abs(rfetch_branch_rel_abs),
