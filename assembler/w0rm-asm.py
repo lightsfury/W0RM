@@ -4,7 +4,7 @@ import sys
 import re
 from functools import reduce
 
-def asm_output_coe(file, lines, start_address=0, output_width=32):
+def asm_output_coe(file, lines, start_address=0, output_width=32, mem_depth=-1):
   file.write('memory_initialization_radix=16;\nmemory_initialization_vector=\n')
   
   for i in range(0, len(lines), int(output_width / 16)):
@@ -18,25 +18,36 @@ def asm_output_coe(file, lines, start_address=0, output_width=32):
     else:
       file.write(",\n")
 
-def asm_output_hex(file, lines, start_address=0, output_width=32):
+def asm_output_hex(file, lines, start_address=0, output_width=32, mem_depth=-1):
   #file.write('@ 0x%0x\n' % start_address)
-  for i in range(1, len(lines), int(output_width / 16)):
+  for i in range(0, len(lines), int(output_width / 16)):
     for j in range (0, int(output_width / 16)):
       if (i + j) < len(lines):
         file.write('%0.4x' % lines[i + j])
       else:
-        file.write('0000')
+        file.write('%0.4x' % 0)
     file.write("\n")
+  if mem_depth > 0:
+    for i in range(len(lines), mem_depth, int(output_width / 16)):
+      for j in range (0, int(output_width / 16)):
+        file.write('%0.4x' % 0)
+      file.write("\n")
 
-def asm_output_bin(file, lines, start_address=0, output_width=32):
+def asm_output_bin(file, lines, start_address=0, output_width=32, mem_depth=-1):
   #file.write('@ 0x%0x\n' % start_address)
-  for i in range(1, len(lines), int(output_width / 16)):
+  for i in range(0, len(lines), int(output_width / 16)):
     for j in range (0, int(output_width / 16)):
-      if (i + j) < len(lines):
-        file.write('%0.4x' % lines[i + j])
+      if (i + j) < len(lines):  
+        file.write('{0:0<016b}'.format(lines[i + j]))
       else:
-        file.write('0000')
+        file.write('{0:0<016b}'.format(0))
     file.write("\n")
+  #print(mem_depth)
+  if mem_depth > 0:
+    for i in range(len(lines), mem_depth, int(output_width / 16)):
+      for j in range (0, int(output_width / 16)):
+        file.write('{0:0<016b}'.format(0))
+      file.write("\n")
 
 asm_output_fuctions = {
   'coe': asm_output_coe,
@@ -337,7 +348,7 @@ def encode_assembly(lines, labels, start_address = 0):
   
   return values
 
-def run_assembler(input_file, output_file, output_type = 'coe', output_width = 32, start_address=0x20000000):
+def run_assembler(input_file, output_file, output_type = 'coe', output_width = 32, start_address=0x20000000, mem_depth=-1):
   with open(input_file) as f:
     lines = f.readlines()
   
@@ -351,30 +362,10 @@ def run_assembler(input_file, output_file, output_type = 'coe', output_width = 3
   lines = extract_mnemonic(lines)
   #print(lines)
   lines = encode_assembly(lines, labels, start_address=start_address)
+  #print(lines)
   
   with open(output_file, 'w') as f:
-    asm_output_fuctions[output_type](f, lines, start_address=start_address, output_width=output_width)
-    '''
-    if output_type == 'coe':
-      f.write('memory_initialization_radix=16;\nmemory_initialization_vector=\n')
-      include_comma = True
-  
-      bits = 0
-    
-    for i in range(len(lines)):
-      f.write(lines[i])
-      bits += 16
-      
-      if bits >= output_width:
-        if include_comma:
-          if (i + 1) == len(lines):
-            f.write(";")
-          else:
-            f.write(",\n")
-        else:
-          f.write("\n");
-        bits = 0
-    '''
+    asm_output_fuctions[output_type](f, lines, start_address=start_address, output_width=output_width, mem_depth=mem_depth)
 
 if __name__=="__main__":
   import sys
@@ -389,7 +380,10 @@ if __name__=="__main__":
   group.add_argument('--output-type', '-t', metavar='<output-type>', type=str_lower, help = "specify output type\n  coe: Format for Xilinx Block Memory Generator IP Core\n  hex: hexadecimal output for use with $readmemh\n  bin: binary output for use with $readmemb", default='coe', choices=['coe', 'hex', 'bin'])
   # Optional start address
   parser.add_argument('--start-address', '-s', metavar='<start address>', type=lambda x: int(x, 0), help='base address to load memory at', default=0x2000000)
-  parser.add_argument('--data-width', '-w', metavar='<data_width>', type=lambda x: int(x, 0), help='Number of bits to encode at each address', default=32)
+  # Optional data width
+  parser.add_argument('--data-width', '-w', metavar='<data width>', type=lambda x: int(x, 0), help='Number of bits to encode at each address', default=32)
+  # Optional memory depth
+  parser.add_argument('--mem-depth', '-d', metavar='<memory depth>', type=lambda x: int(x, 0), help='Depth of the memory in words of <data width> bits in size', default=-1)
   # Positional arguments
   parser.add_argument('input_file', metavar='<input file>', type=str, help='input file path')
   parser.add_argument('output_file', metavar='<output file>', type=str, help='output file path')
@@ -398,5 +392,5 @@ if __name__=="__main__":
   #print(args)
   #print(args.input_type
   #print(sys.argv)
-  run_assembler(args.input_file, args.output_file, output_type=args.output_type, start_address=args.start_address, output_width=args.data_width)
+  run_assembler(args.input_file, args.output_file, output_type=args.output_type, start_address=args.start_address, output_width=args.data_width, mem_depth=args.mem_depth)
   
