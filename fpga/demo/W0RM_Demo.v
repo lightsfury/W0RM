@@ -223,7 +223,7 @@ module W0RM_Demo(
     .DATA_WIDTH(DATA_WIDTH),
     .ADDR_WIDTH(ADDR_WIDTH),
     .GPIO_WIDTH(8),
-    .BASE_ADDR(32'h80000000)
+    .BASE_ADDR(32'h8000_0000)
   ) gpio_a_peripheral (
     .mem_clk(core_clk),
     .cpu_reset(reset_r),
@@ -244,7 +244,7 @@ module W0RM_Demo(
     .DATA_WIDTH(DATA_WIDTH),
     .ADDR_WIDTH(ADDR_WIDTH),
     .GPIO_WIDTH(8),
-    .BASE_ADDR(32'h80000040)
+    .BASE_ADDR(32'h8000_0040)
   ) gpio_b_peripheral (
     .mem_clk(core_clk),
     .cpu_reset(reset_r),
@@ -265,7 +265,7 @@ module W0RM_Demo(
     .DATA_WIDTH(DATA_WIDTH),
     .ADDR_WIDTH(ADDR_WIDTH),
     .GPIO_WIDTH(8),
-    .BASE_ADDR(32'h80000080)
+    .BASE_ADDR(32'h8000_0080)
   ) gpio_c_peripheral (
     .mem_clk(core_clk),
     .cpu_reset(reset_r),
@@ -287,6 +287,7 @@ module W0RM_Demo(
     .DATA_WIDTH(DATA_WIDTH),
     .MEM_DEPTH(1024),
     .USER_WIDTH(1),
+    .BASE_ADDR(32'h4000_0000),
     .USE_BRAM(1)
   ) main_memory (
     .mem_clk(core_clk),

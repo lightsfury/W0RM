@@ -141,7 +141,12 @@ module W0RM_Core_ALU #(
         result_flags_r  <= result_flags_temp;
         if (!data_valid)
         begin
-          user_data_r   <= {USER_WIDTH{1'b0}};
+          opcode_r            <= 1'b0;
+          store_flags_mask_r  <= 1'b0;
+          ext_bit_size_r      <= 1'b0;
+          data_a_r            <= {DATA_WIDTH{1'b0}};
+          data_b_r            <= {DATA_WIDTH{1'b0}};
+          user_data_r         <= {USER_WIDTH{1'b0}};
         end
       end
     end
