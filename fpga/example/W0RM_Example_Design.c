@@ -1,5 +1,7 @@
+/*
 ; Walnut Zero RISC Machine example design program
 ; This program uses a delay loop to toggle an LED
+*/
 
 struct gpio_t
 {
@@ -7,14 +9,6 @@ struct gpio_t
             control,
             input_data,
             output_data;
-};
-
-struct counter_t
-{
-  uint32_t  control,
-            timer,
-            load,
-            reset;
 };
 
 void main(void)
@@ -29,7 +23,7 @@ void main(void)
   {
     gpio_a->output_data ^= 1;
     
-    delay = 0x00ff0000;
+    delay = 0x00040000;
     
     while (--delay != 0);
   }
