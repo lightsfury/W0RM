@@ -30,9 +30,9 @@ module W0RM_ALU_AddSub #(
                           data_a_r = 0,
                           data_b_r = 0;
   reg                     flag_carry_r = 0,
-                          flag_carry_i = 0,
                           result_valid_r = 0;
-  reg   [DATA_WIDTH-1:0]  result_i = 0;
+  wire  [DATA_WIDTH-1:0]  result_i;
+  wire                    flag_carry_i;
   
   assign result_flags[ALU_FLAG_ZERO]  = result_r == 0;
   assign result_flags[ALU_FLAG_NEG]   = result_r[MSB];
@@ -43,27 +43,17 @@ module W0RM_ALU_AddSub #(
   assign result = result_r;
   assign result_valid = result_valid_r;
   
-  always @(opcode, data_a, data_b)
-  begin
-    case (opcode)
-      ALU_OPCODE_ADD:
-        {flag_carry_i, result_i}  = (data_a + data_b);
-      
-      ALU_OPCODE_SUB:
-        {flag_carry_i, result_i}  = (data_a + ~data_b) + 1;
-      
-      default:
-      begin
-        result_i      = {DATA_WIDTH{1'b0}};
-        flag_carry_i  = 0;
-      end
-    endcase
-  end
+  W0RM_Int_AddSub dsp_addsub(
+    .a(data_a),
+    .b(data_b),
+    .add(opcode == ALU_OPCODE_ADD),
+    .c_out(flag_carry_i),
+    .s(result_i)
+  );
   
   generate
     if (SINGLE_CYCLE)
     begin
-      
       always @(result_i, data_valid, data_a, data_b, flag_carry_i)
       begin
         result_r        = result_i;
