@@ -64,6 +64,7 @@ module W0RM_Core_Branch #(
   reg   [USER_WIDTH-1:0]  user_data_r = 0,
                           user_data_r2 = 0;
   
+  reg                     branch_busy_r = 0;
   reg                     branch_taken = 0;
   reg                     next_pc_valid_i = 0;
   reg   [ADDR_WIDTH-1:0]  next_pc_i;
@@ -72,7 +73,7 @@ module W0RM_Core_Branch #(
                           alu_flag_overflow_r = 0,
                           alu_flag_negative_r = 0;
   
-  assign branch_ready   = mem_ready;
+  assign branch_ready   = mem_ready; // && ~branch_busy_r;
   assign branch_valid   = branch_valid_r;
   assign flush_pipeline = next_pc_valid_r;
   assign next_pc_valid  = next_pc_valid_r;
@@ -153,6 +154,8 @@ module W0RM_Core_Branch #(
     begin
       next_pc_r           <= 0;
       next_pc_valid_r     <= 0;
+      branch_valid_r      <= 0;
+      //branch_busy_r       <= 0;
       is_branch_r         <= 0;
       is_cond_branch_r    <= 0;
       cond_branch_code_r  <= 0;
@@ -169,7 +172,7 @@ module W0RM_Core_Branch #(
     end
     else
     begin
-      if (data_valid && is_branch && branch_ready)
+      if (data_valid && is_branch && mem_ready)
       begin
         is_branch_r         <= is_branch;
         is_cond_branch_r    <= is_cond_branch;
@@ -182,11 +185,12 @@ module W0RM_Core_Branch #(
         alu_flag_carry_r    <= alu_flag_carry;
         alu_flag_overflow_r <= alu_flag_overflow;
         alu_flag_negative_r <= alu_flag_negative;
+        //branch_busy_r       <= 1'b1;
         
         user_data_r         <= user_data_in;
       end
       
-      if (data_valid_r && branch_ready)
+      if (data_valid_r && mem_ready)
       begin
         next_pc_r       <= next_pc_i;
         next_pc_valid_r <= next_pc_valid_i;
@@ -202,7 +206,7 @@ module W0RM_Core_Branch #(
           user_data_r2    <= {USER_WIDTH{1'b0}};
         end
         
-        if (~(data_valid && is_branch && branch_ready))
+        if (~(data_valid && is_branch && mem_ready))
         begin
           is_branch_r         <= 1'b0;
           is_cond_branch_r    <= 1'b0;
@@ -215,11 +219,12 @@ module W0RM_Core_Branch #(
           alu_flag_carry_r    <= 1'b0;
           alu_flag_overflow_r <= 1'b0;
           alu_flag_negative_r <= 1'b0;
+          //branch_busy_r       <= 1'b0;
         end
       end
       
-      data_valid_r    <= data_valid && branch_ready;
-      branch_valid_r  <= data_valid_r && branch_taken && branch_ready;
+      data_valid_r    <= data_valid && mem_ready;
+      branch_valid_r  <= data_valid_r && branch_taken;
     end
   end
 endmodule
