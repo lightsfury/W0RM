@@ -92,6 +92,14 @@ module RegisterFile_base_tb #(
     .NUM_REGISTERS(NUM_REGISTERS)
   ) dut (
     .clk(clk),
+    .flush(1'b0),
+    
+    .alu_ready(1'b1),
+    .reg_file_ready(),
+    
+    .decode_valid(1'b1),
+    .rfetch_valid(),
+    
     // Read port 0
     .port_read0_addr(rd0_addr),
     .port_read0_data(rd0_data),

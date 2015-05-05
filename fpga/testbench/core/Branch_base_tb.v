@@ -30,35 +30,6 @@ module Branch_base_tb #(
   
   initial #50 fs_pause <= 1'b0;
   
-  /*
-  always @(posedge clk)
-  begin
-    if (fs_pause)
-    begin
-      fs_go <= 0;
-    end
-    else
-    begin
-      if (first_run)
-      begin
-        if (fs_go)
-        begin
-          fs_go <= 0;
-          first_run <= 0;
-        end
-        else
-        begin
-          fs_go <= 1;
-        end
-      end
-      else
-      begin
-        fs_go <= branch_valid;
-      end
-    end
-  end
-  // */
-  
   always @(posedge clk)
     fs_go <= ~fs_pause;
   
@@ -89,6 +60,7 @@ module Branch_base_tb #(
   W0RM_Core_Branch #(
     .SINGLE_CYCLE(0),
     .DATA_WIDTH(DATA_WIDTH),
+    .ADDR_WIDTH(DATA_WIDTH),
     .USER_WIDTH(1)
   ) dut (
     .clk(clk),

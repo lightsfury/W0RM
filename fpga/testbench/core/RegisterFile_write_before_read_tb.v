@@ -109,9 +109,16 @@ module RegisterFile_write_before_read_tb #(
   W0RM_Core_RegisterFile #(
     .SINGLE_CYCLE(1),
     .DATA_WIDTH(DATA_WIDTH),
-    .NUM_REGISTERS(NUM_REGISTERS)
+    .NUM_REGISTERS(NUM_REGISTERS),
+    .USER_WIDTH(1)
   ) dut (
     .clk(clk),
+    .flush(1'b0),
+    .decode_valid(1'b1),
+    .rfetch_valid(),
+    .reset(1'b0),
+    .alu_ready(1'b1),
+    .reg_file_ready(),
     // Read port 0
     .port_read0_addr(rd0_addr),
     .port_read0_data(rd0_data),
@@ -121,7 +128,10 @@ module RegisterFile_write_before_read_tb #(
     // Write port
     .port_write_addr(wr_addr),
     .port_write_enable(wr_enable & fs_valid),
-    .port_write_data(wr_data)
+    .port_write_data(wr_data),
+    
+    .user_data_in(1'b0),
+    .user_data_out()
   );
   
   assign done   = fc_done;

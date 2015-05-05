@@ -53,7 +53,7 @@ module ALU_AddSub_base_tb #(
   );
   
   W0RM_ALU_AddSub #(
-    .SINGLE_CYCLE(0),
+    .SINGLE_CYCLE(1),
     .DATA_WIDTH(DATA_WIDTH)
   ) dut (
     .clk(clk),
