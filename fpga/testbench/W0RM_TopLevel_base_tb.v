@@ -22,13 +22,16 @@ module W0RM_TopLevel_base_tb #(
                           mem_valid_o;
   reg                     mem_valid_i = 0;
   
-  
   initial #11 reset = 0;
   
   always #2.5 clk <= ~clk;
   
   wire  [INST_WIDTH-1:0]  inst_data;
   wire  [ADDR_WIDTH-1:0]  inst_addr;
+  reg   [ADDR_WIDTH-1:0]  inst_addr_r = 0;
+  
+  always @(posedge clk)
+    inst_addr_r <= inst_addr;
   
   FileMemory #(
     .FILE_PATH(FILE_SOURCE),
@@ -81,6 +84,7 @@ module W0RM_TopLevel_base_tb #(
     .inst_valid_o(inst_req_valid),
     .inst_data_i(inst_data),
     .inst_valid_i(inst_valid),
+    .inst_addr_i(inst_addr_r),
     
     // Data port
     .mem_addr_o(mem_addr_o),
