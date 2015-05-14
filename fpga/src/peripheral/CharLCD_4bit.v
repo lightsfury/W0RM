@@ -89,8 +89,8 @@ module W0RM_Peripheral_CharLCD_4bit #(
   begin
     if (cpu_reset)
     begin
-      enable  = 0;
-      ready   = 0;
+      enable  <= 0;
+      ready   <= 0;
     end
     else
     begin

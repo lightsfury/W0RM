@@ -13,7 +13,7 @@ module W0RM_Demo_tb;
   reg   [7:0]   sw = 0;
   
   assign switches = sw;
-  assign mode_select = 8'd0;
+  assign mode_select = 8'd2;
   
   always #5_000 sw <= sw + 1;
   
